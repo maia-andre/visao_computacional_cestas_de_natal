@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caderno de Visão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #eef1f5; --bg-2: #ffffff; --bg-3: #e2e6ec;
+    --ink: #17202b; --ink-2: #4a5665; --ink-3: #7b8794; --line: #cfd6df;
+    --accent: #6a4cf0; --accent-ink: #ffffff;
+    --z-paletes: #d98b1f; --z-bancada: #1f9a8a; --z-fora: #3f6fb5;
+    --good: #1f8a4c; --warn: #c98a00; --crit: #c93a3a;
+    --paper: #fbfaf6; --rule: #d6dbe3;
+    --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+    --font-body: "Barlow", "Segoe UI", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141a22; --bg-2: #1b232d; --bg-3: #232d39;
+      --ink: #eef1f5; --ink-2: #b4bec9; --ink-3: #7f8b98; --line: #2f3a47;
+      --accent: #8a6cff; --accent-ink: #0f141b;
+      --z-paletes: #f2a541; --z-bancada: #2ec4b0; --z-fora: #6fa0ea;
+      --good: #3fc26f; --warn: #f0b429; --crit: #ef6363;
+      --paper: #1f2731; --rule: #2f3a47;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141a22; --bg-2: #1b232d; --bg-3: #232d39;
+    --ink: #eef1f5; --ink-2: #b4bec9; --ink-3: #7f8b98; --line: #2f3a47;
+    --accent: #8a6cff; --accent-ink: #0f141b;
+    --z-paletes: #f2a541; --z-bancada: #2ec4b0; --z-fora: #6fa0ea;
+    --good: #3fc26f; --warn: #f0b429; --crit: #ef6363;
+    --paper: #1f2731; --rule: #2f3a47;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+    padding-inline: clamp(16px, 3vw, 40px); padding-block: 0 64px;
+  }
+  h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.05; margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  a { color: var(--accent); }
+  code, kbd { font-family: var(--font-mono); font-size: .88em; background: var(--bg-3); padding: 1px 5px; border-radius: 3px; }
+  pre { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.5; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 12px 14px; overflow-x: auto; margin: 0; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  .eyebrow { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: 13px; color: var(--ink-3); }
+
+  /* masthead */
+  .mast { padding-block: 26px 18px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+  .mast h1 { font-size: clamp(34px, 5vw, 52px); font-weight: 700; }
+  .mast h1 span { color: var(--accent); }
+  .mast .sub { color: var(--ink-2); max-width: 62ch; }
+  .toc { display: flex; flex-wrap: wrap; gap: 6px 14px; padding-block: 14px; border-bottom: 1px solid var(--line); font-family: var(--font-display); font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+  .toc a { color: var(--ink-2); text-decoration: none; }
+  .toc a:hover, .toc a:focus-visible { color: var(--accent); }
+  .toc .prog { margin-left: auto; color: var(--ink-3); font-family: var(--font-mono); font-size: 12.5px; text-transform: none; letter-spacing: 0; align-self: center; }
+
+  /* chapters */
+  section.ch { margin-top: 56px; display: grid; gap: 18px; }
+  .ch-head { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: baseline; }
+  .ch-head .n { font-family: var(--font-display); font-size: 44px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .ch-head h2 { font-size: clamp(26px, 3vw, 34px); font-weight: 600; }
+  .where { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-2); }
+  .where code { color: var(--ink); }
+  .where .lbl { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .08em; font-size: 12px; color: var(--ink-3); font-weight: 600; }
+  .two { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+  .theory { display: grid; gap: 12px; max-width: 66ch; }
+  .theory p { color: var(--ink); }
+  .theory .muted { color: var(--ink-2); }
+  .formula { font-family: var(--font-mono); font-size: 15px; background: var(--paper); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 0 4px 4px 0; overflow-x: auto; white-space: pre; line-height: 1.6; }
+  .area { font-size: 13.5px; color: var(--ink-3); }
+  .area b { color: var(--ink-2); font-weight: 600; }
+
+  /* lab */
+  .lab { background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; display: grid; gap: 12px; min-width: 0; }
+  .lab .lab-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .lab h3 { font-size: 20px; font-weight: 600; }
+  .lab .tag { font-family: var(--font-display); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  .lab .hint { font-size: 13.5px; color: var(--ink-2); }
+  .lab svg { display: block; width: 100%; height: auto; max-width: 100%; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; touch-action: manipulation; }
+  .readout { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.6; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 8px 12px; overflow-x: auto; white-space: pre; }
+  .readout b { color: var(--accent); font-weight: 600; }
+  .readout .ok { color: var(--good); } .readout .bad { color: var(--crit); } .readout .wn { color: var(--warn); }
+  .ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; font-size: 14px; }
+  .ctl label { display: inline-flex; align-items: center; gap: 6px; }
+  .ctl input[type="range"] { width: 130px; accent-color: var(--accent); }
+  .ctl input[type="number"], .ctl select { font: inherit; font-size: 14px; color: var(--ink); background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; width: 76px; }
+  .ctl select { width: auto; }
+  .ctl output { font-family: var(--font-mono); font-size: 13px; min-width: 3.5ch; display: inline-block; }
+  button { font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid var(--line); background: var(--bg-2); color: var(--ink); padding: 6px 12px; }
+  button:hover { background: var(--bg-3); }
+  button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button.primary:hover { filter: brightness(1.08); }
+  .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 280px; }
+  .grid5 input { width: 100%; font-family: var(--font-mono); font-size: 13px; text-align: center; color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 3px; padding: 5px 2px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 180px; }
+  .grid3 div { font-family: var(--font-mono); font-size: 13px; text-align: center; padding: 7px 2px; cursor: pointer; border-radius: 3px; background: var(--bg-3); }
+  .grid3 div.hot { background: color-mix(in srgb, var(--accent) 22%, var(--bg-3)); }
+  .grid3 div.neg { background: color-mix(in srgb, var(--z-fora) 22%, var(--bg-3)); }
+  .kgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 120px; }
+  .kgrid div { font-family: var(--font-mono); font-size: 12.5px; text-align: center; padding: 4px 2px; border-radius: 3px; background: var(--paper); border: 1px solid var(--rule); }
+  .labrow { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+  .swatch { width: 100%; height: 44px; border-radius: 4px; border: 1px solid var(--rule); display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
+  .swatch div { display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; }
+
+  /* exercises */
+  .ex-h { font-size: 22px; font-weight: 600; margin-top: 6px; }
+  .exlist { display: grid; gap: 10px; }
+  .ex { background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: start; }
+  .ex .num { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--accent); line-height: 1.2; }
+  .ex .body { display: grid; gap: 8px; min-width: 0; }
+  .ex .body p { color: var(--ink); }
+  .ex .body pre { font-size: 13px; }
+  .ex details { border-top: 1px dashed var(--rule); padding-top: 8px; }
+  .ex summary { cursor: pointer; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .08em; font-size: 13px; font-weight: 600; color: var(--ink-3); list-style: none; display: flex; align-items: center; gap: 8px; }
+  .ex summary::-webkit-details-marker { display: none; }
+  .ex summary::before { content: ""; width: 0; height: 0; border-left: 6px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform .15s; }
+  .ex details[open] summary::before { transform: rotate(90deg); }
+  .ex details p { color: var(--ink-2); margin-top: 6px; font-size: 15px; }
+  .ex .done { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--rule); padding-top: 8px; }
+  .ex .done input { accent-color: var(--good); width: 16px; height: 16px; }
+  .ex.is-done { border-color: color-mix(in srgb, var(--good) 45%, var(--line)); }
+  .ex.is-done .num { color: var(--good); }
+
+  /* study path */
+  .path { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  @media (max-width: 900px) { .path { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .path { grid-template-columns: 1fr; } }
+  .step { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+  .step .n { font-family: var(--font-display); font-size: 12px; letter-spacing: .1em; color: var(--accent); font-weight: 700; }
+  .step h3 { font-size: 20px; font-weight: 600; }
+  .step p { font-size: 14px; color: var(--ink-2); }
+  .refs { display: grid; gap: 6px; font-size: 15px; color: var(--ink-2); max-width: 70ch; }
+  table.mini { border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+  table.mini th, table.mini td { padding: 5px 10px; border-bottom: 1px solid var(--rule); text-align: left; }
+  table.mini th { font-family: var(--font-display); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 12.5px; color: var(--ink-3); }
+  table.mini input { width: 70px; font: inherit; font-size: 14px; font-family: var(--font-mono); color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 3px; padding: 3px 6px; }
+  .tblwrap { overflow-x: auto; }
+  .z-p { color: var(--z-paletes); } .z-b { color: var(--z-bancada); } .z-f { color: var(--z-fora); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <span class="eyebrow">Cestas de Natal · matemática do pipeline</span>
+  <h1>Caderno de <span>Visão</span></h1>
+  <p class="sub">Um capítulo por etapa do <code>contar.py</code>: detecção → tracking → zonas → regras → medição. Em cada um, a teoria em meia página, um laboratório para mexer com os números e exercícios com gabarito escondido. Marque os feitos; o progresso fica neste navegador.</p>
+</header>
+
+<nav class="toc" aria-label="Capítulos">
+  <a href="#c1">1 · Matriz</a>
+  <a href="#c2">2 · Convolução</a>
+  <a href="#c3">3 · Treinar</a>
+  <a href="#c4">4 · IoU</a>
+  <a href="#c5">5 · Tracking</a>
+  <a href="#c6">6 · Zonas</a>
+  <a href="#c7">7 · Perspectiva</a>
+  <a href="#c8">8 · Reconciliação</a>
+  <a href="#roteiro">Roteiro</a>
+  <span class="prog" id="prog">0 / 10 exercícios</span>
+</nav>
+
+<!-- ============ 1 ============ -->
+<section class="ch" id="c1">
+  <div class="ch-head"><span class="n">1</span><h2>Imagem é matriz</h2></div>
+  <div class="where"><span class="lbl">No projeto</span> cada frame que o <code>pipeline.py</code> recebe do OpenCV é um array NumPy <code>(1080, 1920, 3)</code></div>
+  <div class="two">
+    <div class="theory">
+      <p>Um frame 1080p é um tensor <b>altura × largura × canais</b>: 1080 linhas, 1920 colunas, 3 valores por pixel (R, G, B), cada um de 0 a 255. Tudo o que vem depois — filtro, rede neural, zona — é operar nessa matriz.</p>
+      <p>O primeiro cálculo clássico é converter para cinza. Não é a média simples: é uma <b>combinação linear</b> com pesos que vêm da sensibilidade do olho (o verde pesa mais):</p>
+      <div class="formula">Y = 0,299·R + 0,587·G + 0,114·B</div>
+      <p class="muted">Combinação linear = produto escalar entre o vetor de pesos (0,299; 0,587; 0,114) e o vetor do pixel (R, G, B). Essa mesma operação, repetida com outros pesos, é o que a convolução do capítulo 2 faz.</p>
+      <p class="area"><b>Área:</b> álgebra linear — matrizes, vetores, produto escalar.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-h"><h3>Pixel → cinza</h3><span class="tag">laboratório</span></div>
+      <div class="ctl">
+        <label>R <input type="range" id="r" min="0" max="255" value="200"><output id="ro">200</output></label>
+        <label>G <input type="range" id="g" min="0" max="255" value="100"><output id="go">100</output></label>
+        <label>B <input type="range" id="b" min="0" max="255" value="50"><output id="bo">50</output></label>
+      </div>
+      <div class="swatch"><div id="swc">RGB</div><div id="swg">Y</div></div>
+      <div class="readout" id="grayout"></div>
+    </div>
+  </div>
+  <h3 class="ex-h">Exercício</h3>
+  <div class="exlist">
+    <div class="ex" data-ex="1"><span class="num">1</span><div class="body">
+      <p>Pixel RGB = (200, 100, 50). Qual o valor em cinza? Calcule à mão e confira no laboratório.</p>
+      <details><summary>Gabarito</summary><p>0,299·200 + 0,587·100 + 0,114·50 = 59,8 + 58,7 + 5,7 ≈ <b>124</b>.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch" id="c2">
+  <div class="ch-head"><span class="n">2</span><h2>Convolução — o coração do YOLO</h2></div>
+  <div class="where"><span class="lbl">No projeto</span> <code>yolov8n.pt</code> é uma pilha de camadas convolucionais; os kernels foram aprendidos, não escritos à mão</div>
+  <div class="two">
+    <div class="theory">
+      <p>Um <b>kernel</b> (matriz pequena, 3×3) desliza sobre a imagem. Em cada posição, multiplica elemento a elemento e soma tudo — um produto escalar entre o kernel e o pedacinho de imagem embaixo dele. O resultado vira um pixel da imagem de saída.</p>
+      <div class="formula">saída(i, j) = Σ  kernel(a, b) · imagem(i+a, j+b)
+              a,b ∈ {−1, 0, +1}</div>
+      <p>O kernel <b>Sobel-x</b> (−1 0 +1 / −2 0 +2 / −1 0 +1) responde forte onde a imagem muda da esquerda para a direita: é um detector de <b>borda vertical</b>. O Sobel-y, transposto, detecta borda horizontal.</p>
+      <p class="muted">Sobel foi desenhado por alguém. Uma rede neural <b>aprende</b> os kernels — milhões deles, em camadas — a partir dos exemplos anotados. É isso que "treinar o modelo" na Fase 2 quer dizer: descobrir quais kernels fazem uma cesta acender.</p>
+      <p class="area"><b>Área:</b> álgebra linear; ideia de filtro em sinais.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-h"><h3>Deslize o kernel</h3><span class="tag">laboratório</span></div>
+      <p class="hint">Edite a imagem 5×5, escolha o kernel. A saída 3×3 é a convolução "válida" (sem borda). Clique numa célula da saída para ver o cálculo.</p>
+      <div class="ctl">
+        <label>Kernel <select id="ksel">
+          <option value="sx">Sobel-x (borda vertical)</option>
+          <option value="sy">Sobel-y (borda horizontal)</option>
+          <option value="box">Média 3×3 (borrar)</option>
+          <option value="lap">Laplaciano (todas as bordas)</option>
+          <option value="id">Identidade</option>
+        </select></label>
+        <button id="preset-v">borda vertical</button>
+        <button id="preset-h">borda horizontal</button>
+      </div>
+      <div class="labrow">
+        <div><div class="hint">imagem</div><div class="grid5" id="img5"></div></div>
+        <div><div class="hint">kernel</div><div class="kgrid" id="kview"></div></div>
+        <div><div class="hint">saída</div><div class="grid3" id="out3"></div></div>
+      </div>
+      <div class="readout" id="convout">clique numa célula da saída</div>
+    </div>
+  </div>
+  <h3 class="ex-h">Exercício</h3>
+  <div class="exlist">
+    <div class="ex" data-ex="2"><span class="num">2</span><div class="body">
+      <p>Aplique o Sobel-x no centro deste trecho. Depois no segundo (borda horizontal). O que o resultado do segundo diz sobre o que o Sobel-x "enxerga"?</p>
+<pre>  0   0  100          0    0    0
+  0   0  100          0    0    0
+  0   0  100        100  100  100</pre>
+      <details><summary>Gabarito</summary><p>Primeiro: cada linha do kernel dá (−1·0 + 1·100), com pesos 1, 2, 1 → 100 + 200 + 100 = <b>400</b>. Borda vertical forte. Segundo: cada linha dá (−1·a + 1·a) = 0 → <b>0</b>. O Sobel-x só vê variação na horizontal; para a borda horizontal é preciso o Sobel-y. Confira nos presets do laboratório.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch" id="c3">
+  <div class="ch-head"><span class="n">3</span><h2>Treinar é minimizar uma função</h2></div>
+  <div class="where"><span class="lbl">No projeto</span> <code>model.train(epochs=60, patience=15)</code> na Fase 2 — cada época é uma passada disso pelo dataset inteiro</div>
+  <div class="two">
+    <div class="theory">
+      <p>O modelo tem parâmetros θ (os valores dos kernels). Para cada imagem anotada, uma <b>função de perda</b> L(θ) mede o quanto a caixa prevista difere da caixa real. Treinar é descer o morro de L:</p>
+      <div class="formula">θ ← θ − η · ∇L(θ)
+η = taxa de aprendizado (learning rate)</div>
+      <p>∇L é o gradiente: a derivada parcial de L em relação a cada parâmetro. Ele aponta para onde L cresce; andamos no sentido contrário, um passo de tamanho η. Com milhões de parâmetros, o cálculo do gradiente camada a camada é o <b>backpropagation</b> — a regra da cadeia aplicada em cascata.</p>
+      <p class="muted">η grande demais e o passo pula para o outro lado do vale, cada vez mais longe (diverge). η pequeno demais e leva uma eternidade. O <code>patience=15</code> da Fase 2 é: "se 15 épocas não melhoraram a validação, pare".</p>
+      <p class="area"><b>Área:</b> cálculo — derivadas parciais, gradiente, regra da cadeia.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-h"><h3>Gradiente descendente em 1D</h3><span class="tag">laboratório</span></div>
+      <p class="hint">L(θ) = (θ − 3)², então ∇L = 2(θ − 3). O mínimo está em θ = 3. Comece em θ = 0 e dê passos. Experimente η = 1,1.</p>
+      <div class="ctl">
+        <label>η <select id="lr"><option value="0.1">0,1</option><option value="0.5">0,5</option><option value="0.9">0,9</option><option value="1.1">1,1</option></select></label>
+        <button class="primary" id="gd-step">Dar um passo</button>
+        <button id="gd-reset">Recomeçar</button>
+      </div>
+      <svg id="gdsvg" viewBox="0 0 320 150" role="img" aria-label="Parábola da perda com os passos do gradiente"></svg>
+      <div class="readout" id="gdout"></div>
+    </div>
+  </div>
+  <h3 class="ex-h">Exercício</h3>
+  <div class="exlist">
+    <div class="ex" data-ex="3"><span class="num">3</span><div class="body">
+      <p>Com L(θ) = (θ − 3)², θ = 0 e η = 0,25: calcule ∇L, o novo θ e a nova perda. Quantos passos até a perda ficar abaixo de 0,01? (Dica: cada passo multiplica a distância até 3 por um fator fixo. Qual?)</p>
+      <details><summary>Gabarito</summary><p>∇L(0) = 2·(0 − 3) = −6. θ₁ = 0 − 0,25·(−6) = <b>1,5</b>; L(1,5) = 2,25. A distância até 3 vai de 3 para 1,5: fator <b>0,5</b> por passo (em geral 1 − 2η). Perda = distância²: 9, 2,25, 0,5625, 0,1406, 0,0352, <b>0,0088 no 5º passo</b>. Com η = 1,1 o fator é |1 − 2,2| = 1,2 &gt; 1 — diverge, como no laboratório.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch" id="c4">
+  <div class="ch-head"><span class="n">4</span><h2>IoU, precisão, recall</h2></div>
+  <div class="where"><span class="lbl">No projeto</span> a meta <code>mAP50 ≥ 0,85</code> da Fase 2 e o item "por que <code>--conf</code> alto e baixo pioram" da Fase 0</div>
+  <div class="two">
+    <div class="theory">
+      <p><b>IoU</b> (Intersection over Union) diz o quanto duas caixas se sobrepõem:</p>
+      <div class="formula">IoU = área(A ∩ B) / área(A ∪ B)
+área(A ∪ B) = área(A) + área(B) − área(A ∩ B)</div>
+      <p>Uma detecção é "acerto" se tem IoU ≥ 0,5 com uma caixa anotada (o "50" de mAP50). A partir dos acertos:</p>
+      <div class="formula">precisão = acertos / detectados    "do que apontei, quanto era cesta?"
+recall   = acertos / reais         "das cestas reais, quantas achei?"</div>
+      <p class="muted">O <b>mAP</b> é a área sob a curva precisão × recall obtida variando o limiar de confiança. Por isso <code>--conf</code> puxa os dois lados: baixo → mais detecções, precisão cai; alto → perde as ocluídas, recall cai.</p>
+      <p class="area"><b>Área:</b> geometria plana; estatística de classificação.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-h"><h3>Mova a caixa B</h3><span class="tag">laboratório</span></div>
+      <p class="hint">A (fixa) é a anotação; B é a detecção. Arraste os controles até B contar como acerto.</p>
+      <div class="ctl">
+        <label>Bx <input type="range" id="bx" min="0" max="60" value="30"><output id="bxo">30</output></label>
+        <label>By <input type="range" id="by" min="0" max="60" value="30"><output id="byo">30</output></label>
+      </div>
+      <svg id="iousvg" viewBox="0 0 200 110" role="img" aria-label="Duas caixas e sua interseção"></svg>
+      <div class="readout" id="iouout"></div>
+      <div class="lab-h"><h3>Precisão e recall</h3></div>
+      <div class="ctl">
+        <label>reais <input type="number" id="pr-real" value="41" min="1"></label>
+        <label>detectados <input type="number" id="pr-det" value="43" min="0"></label>
+        <label>acertos <input type="number" id="pr-hit" value="39" min="0"></label>
+      </div>
+      <div class="readout" id="prout"></div>
+    </div>
+  </div>
+  <h3 class="ex-h">Exercícios</h3>
+  <div class="exlist">
+    <div class="ex" data-ex="4"><span class="num">4</span><div class="body">
+      <p>Caixa A: canto (10, 10), 40 × 40. Caixa B: canto (30, 30), 40 × 40. Calcule o IoU. Conta como acerto?</p>
+      <details><summary>Gabarito</summary><p>Interseção: x de 30 a 50, y de 30 a 50 → 20 × 20 = 400. União: 1600 + 1600 − 400 = 2800. IoU = 400/2800 ≈ <b>0,14</b>. Não é acerto. (É a posição inicial do laboratório.)</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+    <div class="ex" data-ex="5"><span class="num">5</span><div class="body">
+      <p>Num vídeo havia 41 cestas. O sistema detectou 43 caixas, das quais 39 batiam com cestas reais. Precisão? Recall? Erro percentual da contagem (o "≤ 5%" da Fase 3)? Por que esse erro pode enganar?</p>
+      <details><summary>Gabarito</summary><p>Precisão = 39/43 ≈ <b>0,91</b>; recall = 39/41 ≈ <b>0,95</b>. Erro de contagem = |43 − 41| / 41 ≈ <b>4,9%</b> — passa na meta, mas 4 falsos positivos e 2 perdidos se compensaram. É por isso que a Fase 3 manda olhar os snapshots, não só o total.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="ch" id="c5">
+  <div class="ch-head"><span class="n">5</span><h2>Tracking — prever e casar</h2></div>
+  <div class="where"><span class="lbl">No projeto</span> <code>ByteTrackTracker</code> em <code>pipeline.py</code>; o bug do <code>tracker_id = -1</code> da Fase 0 é uma detecção que ainda não foi casada com ninguém</div>
+  <div class="two">
+    <div class="theory">
+      <p>A cada frame o tracker faz duas coisas.</p>
+      <p><b>a) Prever</b> onde cada objeto conhecido deve estar, com um <b>filtro de Kalman</b>. Na versão mínima é cinemática:</p>
+      <div class="formula">x(t+1) = x(t) + vx·Δt
+y(t+1) = y(t) + vy·Δt</div>
+      <p class="muted">O Kalman completo carrega junto uma matriz de covariância — "quanto confio nessa previsão" — que cresce a cada frame sem detecção e encolhe quando uma detecção confirma. É o que segura o <code>#id</code> quando a mão cobre a cesta por 3 frames.</p>
+      <p><b>b) Casar</b> previsões com as detecções novas. Monta-se uma <b>matriz de custo</b> (custo = 1 − IoU) e resolve-se o problema de atribuição com o <b>algoritmo húngaro</b>: a combinação um-para-um de custo total mínimo. Detecção que não casa com ninguém vira candidato a objeto novo (o <code>-1</code>).</p>
+      <p class="area"><b>Área:</b> probabilidade (gaussiana, covariância); otimização combinatória.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-h"><h3>Atribuição 2×2</h3><span class="tag">laboratório</span></div>
+      <p class="hint">Edite os IoU entre previsões (P) e detecções (D). O húngaro minimiza o custo total — não escolhe o par mais forte isoladamente.</p>
+      <div class="tblwrap"><table class="mini" id="asg">
+        <tr><th></th><th>D1</th><th>D2</th></tr>
+        <tr><th>P1</th><td><input type="number" step="0.1" min="0" max="1" value="0.7" data-a="00"></td><td><input type="number" step="0.1" min="0" max="1" value="0.2" data-a="01"></td></tr>
+        <tr><th>P2</th><td><input type="number" step="0.1" min="0" max="1" value="0.4" data-a="10"></td><td><input type="number" step="0.1" min="0" max="1" value="0.6" data-a="11"></td></tr>
+      </table></div>
+      <div class="readout" id="asgout"></div>
+    </div>
+  </div>
+  <h3 class="ex-h">Exercícios</h3>
+  <div class="exlist">
+    <div class="ex" data-ex="6"><span class="num">6</span><div class="body">
+      <p>Cesta <code>#7</code> estava em x = 300 no frame 10 e x = 330 no frame 12. Uma mão a cobre nos frames 13 e 14. Onde o tracker prevê que ela está no frame 15?</p>
+      <details><summary>Gabarito</summary><p>Velocidade = 30 px / 2 frames = 15 px/frame. Frame 15 = 330 + 3·15 = <b>375</b>. Se a detecção reaparecer perto de 375, o IoU com a previsão é alto e o <code>#7</code> sobrevive; longe demais, nasce um <code>#8</code> — e a cesta é contada duas vezes.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+    <div class="ex" data-ex="7"><span class="num">7</span><div class="body">
+      <p>Com a matriz do laboratório (0,7 / 0,2 / 0,4 / 0,6), monte a matriz de custo e escolha a atribuição de custo mínimo. Agora troque IoU(P2, D1) por 0,9 — muda?</p>
+      <details><summary>Gabarito</summary><p>Custos: 0,3 / 0,8 / 0,6 / 0,4. (P1D1 + P2D2) = 0,7 contra (P1D2 + P2D1) = 1,4 → <b>P1↔D1, P2↔D2</b>. Com IoU(P2,D1) = 0,9 o custo vira 0,1: (P1D2 + P2D1) = 0,9 contra 0,7 → <b>não muda</b>. Mesmo o par mais forte da matriz perde para a soma menor.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="ch" id="c6">
+  <div class="ch-head"><span class="n">6</span><h2>Zonas e linhas — geometria computacional</h2></div>
+  <div class="where"><span class="lbl">No projeto</span> <code>zonas.py</code> (polígonos) e o <code>LineZone</code> da Fase 0; o experimento "inverta as pontas e veja <code>in</code>/<code>out</code> trocar"</div>
+  <div class="two">
+    <div class="theory">
+      <p><b>De que lado da linha está o ponto?</b> Produto vetorial 2D entre o vetor da linha (P₁→P₂) e o vetor até o centro da caixa (P₁→C):</p>
+      <div class="formula">s = (x₂ − x₁)(cy − y₁) − (y₂ − y₁)(cx − x₁)</div>
+      <p>O <b>sinal</b> de s diz o lado. Se o sinal muda entre dois frames, o objeto cruzou. Inverter P₁ e P₂ inverte o sinal — por isso o sentido <code>in</code>/<code>out</code> depende da direção do segmento.</p>
+      <p><b>O ponto está dentro do polígono?</b> A bancada em L tem 6 lados e é côncava; a resposta é o <b>ray casting</b>: traça uma semirreta do ponto para a direita e conta quantas arestas ela cruza. Ímpar = dentro, par = fora. Funciona para qualquer formato.</p>
+      <p class="muted">Só o <b>centro</b> da caixa é testado, para uma mão encostando na fronteira não contar. E uma transição só é aceita após <code>--confirmacao</code> frames na zona nova — um filtro contra o "tremor" da caixa em cima da borda.</p>
+      <p class="area"><b>Área:</b> geometria analítica, vetores.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-h"><h3>Lado da linha</h3><span class="tag">laboratório</span></div>
+      <p class="hint">Clique para posicionar C. Inverta a linha e veja o sinal trocar.</p>
+      <svg id="linesvg" viewBox="0 0 220 120" role="img" aria-label="Linha e ponto com sinal do produto vetorial"></svg>
+      <div class="ctl"><button id="line-flip">Inverter P₁ ↔ P₂</button></div>
+      <div class="readout" id="lineout"></div>
+      <div class="lab-h"><h3>Ray casting no L</h3></div>
+      <p class="hint">Clique num ponto. A semirreta para a direita conta cruzamentos com as arestas.</p>
+      <svg id="raysvg" viewBox="0 0 220 150" role="img" aria-label="Polígono em L e semirreta"></svg>
+      <div class="readout" id="rayout"></div>
+    </div>
+  </div>
+  <h3 class="ex-h">Exercícios</h3>
+  <div class="exlist">
+    <div class="ex" data-ex="8"><span class="num">8</span><div class="body">
+      <p>Linha de P₁ = (0, 5) a P₂ = (10, 5). Calcule s para C = (5, 2) e C = (5, 8). Depois inverta a linha (P₁ = (10, 5), P₂ = (0, 5)) e recalcule.</p>
+      <details><summary>Gabarito</summary><p>s = (10 − 0)(cy − 5) − 0 = 10·(cy − 5). C = (5, 2): <b>−30</b>; C = (5, 8): <b>+30</b>. Linha invertida: s = −10·(cy − 5) → <b>+30 e −30</b>. Os sinais trocam — logo <code>in</code>/<code>out</code> trocam.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+    <div class="ex" data-ex="9"><span class="num">9</span><div class="body">
+      <p>Polígono em L com vértices (0,0), (6,0), (6,2), (2,2), (2,6), (0,6). O ponto (4, 4) está dentro? E (1, 4)? Conte os cruzamentos da semirreta horizontal para a direita.</p>
+      <details><summary>Gabarito</summary><p>(4, 4): a semirreta y = 4 só poderia cruzar arestas que cobrem y = 4 — a aresta x = 6 vai de y = 0 a 2 (não); a aresta x = 2 vai de y = 2 a 6, mas está à esquerda do ponto (não conta). <b>0 cruzamentos → fora</b> (o canto vazio do L). (1, 4): cruza a aresta x = 2 → <b>1 → dentro</b>.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+  </div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="ch" id="c7">
+  <div class="ch-head"><span class="n">7</span><h2>Perspectiva — quando for medir</h2></div>
+  <div class="where"><span class="lbl">No projeto</span> a decisão "pilha de 2 por altura da caixa ou classe <code>pilha2</code>" da Fase 2, e os marcadores ArUco do <code>hardware_cameras.md</code></div>
+  <div class="two">
+    <div class="theory">
+      <p>Modelo de <b>câmera pinhole</b>: um ponto do mundo (X, Y, Z), com Z a distância até a câmera, vira o pixel</p>
+      <div class="formula">u = f · X / Z        v = f · Y / Z        (f = distância focal, em pixels)</div>
+      <p>Logo o tamanho em pixels cai com <b>1/Z</b>: uma cesta a 6 m parece a metade de uma a 3 m. Numa câmera oblíqua as cestas do fundo do L estão mais longe que as da frente — uma regra de "caixa 1,6× mais alta = pilha" quebra sozinha.</p>
+      <p>O <b>ArUco</b> corrige isso: 4 cantos de um marcador de tamanho conhecido no chão dão uma <b>homografia</b> — matriz 3×3 que mapeia pixel ↔ centímetro naquele plano. Resolve-se um sistema linear 8×8 e pronto: a mesma régua vale em qualquer ponto do chão.</p>
+      <div class="formula">[u', v', w']ᵀ = H · [x, y, 1]ᵀ        pixel = (u'/w', v'/w')</div>
+      <p class="area"><b>Área:</b> geometria projetiva, coordenadas homogêneas.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-h"><h3>Altura em pixels × distância</h3><span class="tag">laboratório</span></div>
+      <p class="hint">f = 1000 px, cesta de 40 cm. Deslize a distância.</p>
+      <div class="ctl">
+        <label>Z <input type="range" id="zdist" min="1" max="8" step="0.5" value="4"><output id="zo">4,0 m</output></label>
+      </div>
+      <svg id="pinsvg" viewBox="0 0 320 130" role="img" aria-label="Altura projetada da cesta em função da distância"></svg>
+      <div class="readout" id="pinout"></div>
+    </div>
+  </div>
+  <h3 class="ex-h">Exercício</h3>
+  <div class="exlist">
+    <div class="ex" data-ex="10"><span class="num">10</span><div class="body">
+      <p>Com f = 1000 px, uma cesta de 40 cm a 4 m da câmera ocupa quantos pixels de altura? E a 2,5 m? Que problema surge para a regra "1,6× a média = pilha de 2"?</p>
+      <details><summary>Gabarito</summary><p>h = f·H/Z. A 4 m: 1000·0,4/4 = <b>100 px</b>; a 2,5 m: <b>160 px</b>. A cesta única mais perto já é "1,6× a média" — a regra confunde distância com pilha. Ou se normaliza a altura pela posição (homografia), ou se usa a classe <code>pilha2</code>.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+  </div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="ch" id="c8">
+  <div class="ch-head"><span class="n">8</span><h2>Reconciliação — a aritmética do projeto</h2></div>
+  <div class="where"><span class="lbl">No projeto</span> os cinco números do <code>05_fase4_reconciliacao.md</code></div>
+  <div class="two">
+    <div class="theory">
+      <p>Depois de tanta matemática, o fechamento é soma e subtração — mas com <b>fontes independentes</b>, que é o que dá valor à conferência:</p>
+      <div class="formula">A. processadas = <span class="z-p">paletes</span>-><span class="z-b">bancada</span> + <span class="z-p">paletes</span>-><span class="z-f">fora</span>      (câmera)
+B. entregues   = <span class="z-b">bancada</span>-><span class="z-f">fora</span>    + <span class="z-p">paletes</span>-><span class="z-f">fora</span>      (câmera)
+C. saldo       = A − B                                (derivado)
+D. esperado    = paletes esvaziados × 40              (operação)
+E. vales       = vales recolhidos                     (papel)
+
+A ≈ D      B ≈ E      C ≈ cestas visíveis na bancada agora</div>
+      <p class="muted">Cada ≈ que falha é uma divergência com endereço: período, transições envolvidas, snapshots. O sinal da diferença já diz onde procurar — sobrecontagem aponta para tracker que perdeu o id e "renasceu"; subcontagem aponta para pilhas de 2 ou entregas fora do quadro.</p>
+      <p class="area"><b>Área:</b> aritmética; raciocínio com fontes independentes.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-h"><h3>Fechamento de um bloco</h3><span class="tag">laboratório</span></div>
+      <div class="ctl">
+        <label>paletes→bancada <input type="number" id="rc-pb" value="118" min="0"></label>
+        <label>paletes→fora <input type="number" id="rc-pf" value="3" min="0"></label>
+        <label>bancada→fora <input type="number" id="rc-bf" value="112" min="0"></label>
+        <label>paletes esvaziados <input type="number" id="rc-pal" value="3" min="0"></label>
+        <label>vales <input type="number" id="rc-val" value="117" min="0"></label>
+        <label>visíveis na bancada <input type="number" id="rc-vis" value="6" min="0"></label>
+      </div>
+      <div class="readout" id="rcout"></div>
+    </div>
+  </div>
+  <h3 class="ex-h">Exercício</h3>
+  <div class="exlist">
+    <div class="ex" data-ex="11"><span class="num">11</span><div class="body">
+      <p>Em 90 minutos o sistema contou 118 <code>paletes->bancada</code> e 3 <code>paletes->fora</code>, e 3 paletes saíram do quadro. Esperado? Divergência? Se houve 4 pilhas de 2 contadas como 1 cesta, a divergência se explica?</p>
+      <details><summary>Gabarito</summary><p>A = 121, D = 3 × 40 = 120 → divergência de <b>+1</b>. Pilhas contadas como 1 escondem cestas: o real seria 125, diferença +5. As pilhas <b>não</b> explicam — explicariam uma subcontagem, e aqui houve sobrecontagem. Candidatos: tracker que perdeu o id e renasceu em <span class="z-p">paletes</span>, ou um 4º palete parcialmente esvaziado.</p></details>
+    </div><label class="done"><input type="checkbox"> feito</label></div>
+  </div>
+</section>
+
+<!-- ============ roteiro ============ -->
+<section class="ch" id="roteiro">
+  <div class="ch-head"><span class="n">→</span><h2>Roteiro de estudo</h2></div>
+  <p class="theory muted" style="max-width:70ch">Na ordem em que o pipeline usa. Cada bloco tem um capítulo aqui para praticar.</p>
+  <div class="path">
+    <div class="step"><span class="n">CAP. 1–2</span><h3>Álgebra linear</h3><p>Matrizes, vetores, produto escalar, sistemas lineares. A convolução é só produto escalar repetido.</p></div>
+    <div class="step"><span class="n">CAP. 6</span><h3>Geometria analítica</h3><p>Vetores no plano, produto vetorial 2D, ponto-em-polígono. É o que roda no <code>zonas.py</code>.</p></div>
+    <div class="step"><span class="n">CAP. 3</span><h3>Cálculo</h3><p>Derivadas parciais, gradiente, regra da cadeia. Suficiente para entender o que <code>train()</code> faz.</p></div>
+    <div class="step"><span class="n">CAP. 4–5</span><h3>Probabilidade</h3><p>Gaussiana, covariância (Kalman), precisão / recall e a curva que vira o mAP.</p></div>
+    <div class="step"><span class="n">CAP. 7</span><h3>Geometria projetiva</h3><p>Coordenadas homogêneas, homografia, calibração. Só quando chegar em medir.</p></div>
+  </div>
+  <div class="refs">
+    <p><b>Szeliski — Computer Vision: Algorithms and Applications</b> (2ª ed., gratuito em szeliski.org/Book): a referência geral; capítulos 2 (formação de imagem), 3 (filtros) e 7 (características).</p>
+    <p><b>Dive into Deep Learning</b> (d2l.ai): redes convolucionais com código junto; capítulos 7 e 14 (detecção de objetos).</p>
+    <p><b>3Blue1Brown — Essence of Linear Algebra</b> e <b>Neural Networks</b>: para ver o gradiente e a convolução em movimento antes de calcular à mão.</p>
+    <p>No projeto: <code>src/cestas/zonas.py</code> implementa os capítulos 6; <code>docs/03_fase2_modelo.md</code> e <code>docs/04_fase3_camera_tenda.md</code> são onde os capítulos 3–5 viram meta numérica.</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n, d = 2) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, text) => {
+    const e = document.createElementNS(svgNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  };
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  /* ---------- progresso (só neste navegador) ---------- */
+  const KEY = 'caderno-visao-progress';
+  const exes = document.querySelectorAll('.ex');
+  let done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { done = {}; }
+  function paintProgress() {
+    let n = 0;
+    exes.forEach((ex) => {
+      const id = ex.dataset.ex, cb = ex.querySelector('.done input');
+      cb.checked = !!done[id]; ex.classList.toggle('is-done', !!done[id]);
+      if (done[id]) n++;
+    });
+    $('prog').textContent = n + ' / ' + exes.length + ' exercícios';
+  }
+  exes.forEach((ex) => {
+    ex.querySelector('.done input').addEventListener('change', (e) => {
+      done[ex.dataset.ex] = e.target.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (err) { /* sem storage: só nesta visita */ }
+      paintProgress();
+    });
+  });
+  paintProgress();
+
+  /* ---------- 1. cinza ---------- */
+  function gray() {
+    const r = +$('r').value, g = +$('g').value, b = +$('b').value;
+    $('ro').value = r; $('go').value = g; $('bo').value = b;
+    const y = 0.299 * r + 0.587 * g + 0.114 * b;
+    $('swc').style.background = `rgb(${r},${g},${b})`;
+    $('swc').style.color = y > 128 ? '#17202b' : '#eef1f5';
+    $('swg').style.background = `rgb(${y},${y},${y})`;
+    $('swg').style.color = y > 128 ? '#17202b' : '#eef1f5';
+    $('swg').textContent = 'Y = ' + Math.round(y);
+    $('grayout').innerHTML = `0,299·${r} + 0,587·${g} + 0,114·${b}\n= ${fmt(0.299 * r, 1)} + ${fmt(0.587 * g, 1)} + ${fmt(0.114 * b, 1)}\n= <b>${fmt(y, 1)}</b>  →  ${Math.round(y)}`;
+  }
+  ['r', 'g', 'b'].forEach((id) => $(id).addEventListener('input', gray));
+  gray();
+
+  /* ---------- 2. convolução ---------- */
+  const KERNELS = {
+    sx: [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]],
+    sy: [[-1, -2, -1], [0, 0, 0], [1, 2, 1]],
+    box: [[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9]],
+    lap: [[0, 1, 0], [1, -4, 1], [0, 1, 0]],
+    id: [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
+  };
+  const PRESETS = {
+    v: [[0, 0, 100, 100, 100], [0, 0, 100, 100, 100], [0, 0, 100, 100, 100], [0, 0, 100, 100, 100], [0, 0, 100, 100, 100]],
+    h: [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [100, 100, 100, 100, 100], [100, 100, 100, 100, 100], [100, 100, 100, 100, 100]],
+  };
+  const img5 = $('img5'), out3 = $('out3'), kview = $('kview');
+  const cells = [];
+  for (let i = 0; i < 25; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.step = '10'; inp.setAttribute('aria-label', 'pixel ' + i);
+    inp.addEventListener('input', conv);
+    img5.appendChild(inp); cells.push(inp);
+  }
+  const outs = [];
+  for (let i = 0; i < 9; i++) {
+    const d = document.createElement('div'); d.tabIndex = 0; d.dataset.i = i;
+    d.addEventListener('click', () => explain(i));
+    d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); explain(i); } });
+    out3.appendChild(d); outs.push(d);
+  }
+  let selected = 4;
+  function setImg(m) { m.forEach((row, i) => row.forEach((v, j) => { cells[i * 5 + j].value = v; })); conv(); }
+  function getImg() { const m = []; for (let i = 0; i < 5; i++) { m.push([]); for (let j = 0; j < 5; j++) m[i].push(+cells[i * 5 + j].value || 0); } return m; }
+  function kernel() { return KERNELS[$('ksel').value]; }
+  function kfmt(v) { return Math.abs(v - 1 / 9) < 1e-9 ? '1/9' : String(v); }
+  function conv() {
+    const m = getImg(), k = kernel();
+    kview.innerHTML = '';
+    k.forEach((row) => row.forEach((v) => { const d = document.createElement('div'); d.textContent = kfmt(v); kview.appendChild(d); }));
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) {
+      let s = 0;
+      for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) s += k[a][b] * m[i + a][j + b];
+      const d = outs[i * 3 + j];
+      d.textContent = Number.isInteger(s) ? s : fmt(s, 1);
+      d.className = s > 0 ? 'hot' : (s < 0 ? 'neg' : '');
+    }
+    explain(selected);
+  }
+  function explain(idx) {
+    selected = idx;
+    const m = getImg(), k = kernel(), i = Math.floor(idx / 3), j = idx % 3;
+    const terms = []; let s = 0;
+    for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) { const kv = k[a][b], iv = m[i + a][j + b]; if (kv !== 0) { terms.push(`${kfmt(kv)}·${iv}`); s += kv * iv; } }
+    $('convout').innerHTML = `saída(${i},${j}) = ${terms.length ? terms.join(' + ') : '0'}\n         = <b>${Number.isInteger(s) ? s : fmt(s, 2)}</b>`;
+    outs.forEach((d, n) => d.style.outline = n === idx ? '2px solid ' + css('--accent') : '');
+  }
+  $('ksel').addEventListener('change', conv);
+  $('preset-v').addEventListener('click', () => setImg(PRESETS.v));
+  $('preset-h').addEventListener('click', () => setImg(PRESETS.h));
+  setImg(PRESETS.v);
+
+  /* ---------- 3. gradiente ---------- */
+  let theta = 0, hist = [];
+  const gdsvg = $('gdsvg');
+  const L = (t) => (t - 3) * (t - 3);
+  function gdDraw() {
+    gdsvg.innerHTML = '';
+    const ink3 = css('--ink-3'), acc = css('--accent'), crit = css('--crit');
+    const X = (t) => 20 + (t + 2) * (280 / 10);      // θ ∈ [-2, 8]
+    const Y = (v) => 130 - Math.min(v, 30) * (110 / 30); // L ∈ [0, 30]
+    let d = '';
+    for (let t = -2; t <= 8; t += 0.1) d += (d ? ' L' : 'M') + X(t).toFixed(1) + ' ' + Y(L(t)).toFixed(1);
+    gdsvg.appendChild(el('path', { d, fill: 'none', stroke: ink3, 'stroke-width': 1.5 }));
+    gdsvg.appendChild(el('line', { x1: 20, y1: 130, x2: 300, y2: 130, stroke: ink3, 'stroke-width': .6 }));
+    [-2, 0, 3, 6, 8].forEach((t) => gdsvg.appendChild(el('text', { x: X(t), y: 143, 'font-size': 8, 'text-anchor': 'middle', fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, 'θ=' + t)));
+    for (let i = 1; i < hist.length; i++) {
+      gdsvg.appendChild(el('line', { x1: X(hist[i - 1]), y1: Y(L(hist[i - 1])), x2: X(hist[i]), y2: Y(L(hist[i])), stroke: acc, 'stroke-width': 1, 'stroke-dasharray': '3 2' }));
+    }
+    hist.forEach((t, i) => gdsvg.appendChild(el('circle', { cx: X(t), cy: Y(L(t)), r: i === hist.length - 1 ? 4 : 2.5, fill: Math.abs(t) > 8 ? crit : acc })));
+  }
+  function gdOut(note) {
+    const g = 2 * (theta - 3);
+    $('gdout').innerHTML = `passo ${hist.length - 1}   θ = <b>${fmt(theta, 3)}</b>   L(θ) = ${fmt(L(theta), 3)}   ∇L = ${fmt(g, 3)}${note ? '\n' + note : ''}`;
+  }
+  function gdReset() { theta = 0; hist = [0]; gdDraw(); gdOut('próximo passo: θ − η·∇L'); }
+  $('gd-step').addEventListener('click', () => {
+    const eta = +$('lr').value, g = 2 * (theta - 3), prev = theta;
+    theta = theta - eta * g; hist.push(theta); gdDraw();
+    let note = `θ ← ${fmt(prev, 3)} − ${eta}·(${fmt(g, 3)}) = ${fmt(theta, 3)}`;
+    if (Math.abs(theta - 3) > Math.abs(prev - 3)) note += '   <span class="bad">afastou do mínimo — η grande demais</span>';
+    else if (L(theta) < 0.01) note += '   <span class="ok">convergiu</span>';
+    gdOut(note);
+  });
+  $('gd-reset').addEventListener('click', gdReset);
+  $('lr').addEventListener('change', gdReset);
+  gdReset();
+
+  /* ---------- 4. IoU ---------- */
+  const A = { x: 10, y: 10, w: 40, h: 40 };
+  const iousvg = $('iousvg');
+  function iou() {
+    const B = { x: +$('bx').value, y: +$('by').value, w: 40, h: 40 };
+    $('bxo').value = B.x; $('byo').value = B.y;
+    const ix = Math.max(0, Math.min(A.x + A.w, B.x + B.w) - Math.max(A.x, B.x));
+    const iy = Math.max(0, Math.min(A.y + A.h, B.y + B.h) - Math.max(A.y, B.y));
+    const inter = ix * iy, uni = A.w * A.h + B.w * B.h - inter, v = inter / uni;
+    iousvg.innerHTML = '';
+    const zb = css('--z-bancada'), zp = css('--z-paletes'), acc = css('--accent'), ink3 = css('--ink-3');
+    const S = 1, ox = 5, oy = 5;
+    iousvg.appendChild(el('rect', { x: ox + A.x * S, y: oy + A.y * S, width: A.w, height: A.h, fill: zb, 'fill-opacity': .18, stroke: zb, 'stroke-width': 1.5 }));
+    iousvg.appendChild(el('rect', { x: ox + B.x * S, y: oy + B.y * S, width: B.w, height: B.h, fill: zp, 'fill-opacity': .18, stroke: zp, 'stroke-width': 1.5 }));
+    if (inter > 0) iousvg.appendChild(el('rect', { x: ox + Math.max(A.x, B.x), y: oy + Math.max(A.y, B.y), width: ix, height: iy, fill: acc, 'fill-opacity': .45 }));
+    iousvg.appendChild(el('text', { x: ox + A.x + 3, y: oy + A.y + 9, 'font-size': 8, fill: zb, 'font-family': 'IBM Plex Mono, monospace' }, 'A'));
+    iousvg.appendChild(el('text', { x: ox + B.x + 3, y: oy + B.y + 9, 'font-size': 8, fill: zp, 'font-family': 'IBM Plex Mono, monospace' }, 'B'));
+    iousvg.appendChild(el('text', { x: 120, y: 30, 'font-size': 9, fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, 'A = (10,10) 40×40'));
+    iousvg.appendChild(el('text', { x: 120, y: 42, 'font-size': 9, fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, `B = (${B.x},${B.y}) 40×40`));
+    iousvg.appendChild(el('text', { x: 120, y: 66, 'font-size': 22, fill: v >= .5 ? css('--good') : css('--crit'), 'font-family': 'Barlow Condensed, sans-serif', 'font-weight': 700 }, 'IoU ' + fmt(v, 2)));
+    iousvg.appendChild(el('text', { x: 120, y: 80, 'font-size': 9, fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, v >= .5 ? 'acerto (≥ 0,5)' : 'não conta (< 0,5)'));
+    $('iouout').innerHTML = `interseção = ${ix} × ${iy} = ${inter}\nunião      = 1600 + 1600 − ${inter} = ${uni}\nIoU        = ${inter} / ${uni} = <b>${fmt(v, 3)}</b>`;
+  }
+  ['bx', 'by'].forEach((id) => $(id).addEventListener('input', iou));
+  iou();
+
+  function pr() {
+    const real = +$('pr-real').value || 0, det = +$('pr-det').value || 0, hit = Math.min(+$('pr-hit').value || 0, det, real);
+    const p = det ? hit / det : 0, r = real ? hit / real : 0, err = real ? Math.abs(det - real) / real : 0;
+    $('prout').innerHTML = `precisão = ${hit}/${det} = <b>${fmt(p)}</b>     recall = ${hit}/${real} = <b>${fmt(r)}</b>\nerro de contagem = |${det} − ${real}| / ${real} = <b class="${err <= .05 ? 'ok' : 'bad'}">${fmt(err * 100, 1)}%</b>   (falsos positivos ${det - hit}, perdidas ${real - hit})`;
+  }
+  ['pr-real', 'pr-det', 'pr-hit'].forEach((id) => $(id).addEventListener('input', pr));
+  pr();
+
+  /* ---------- 5. atribuição ---------- */
+  function asg() {
+    const v = {};
+    document.querySelectorAll('#asg input').forEach((i) => { v[i.dataset.a] = Math.min(1, Math.max(0, +i.value || 0)); });
+    const c = { '00': 1 - v['00'], '01': 1 - v['01'], '10': 1 - v['10'], '11': 1 - v['11'] };
+    const opt1 = c['00'] + c['11'], opt2 = c['01'] + c['10'];
+    const best = opt1 <= opt2 ? 1 : 2;
+    $('asgout').innerHTML = `custo = 1 − IoU:   P1D1 ${fmt(c['00'], 1)}  P1D2 ${fmt(c['01'], 1)}  P2D1 ${fmt(c['10'], 1)}  P2D2 ${fmt(c['11'], 1)}\n${best === 1 ? '<b>' : ''}P1↔D1 + P2↔D2 = ${fmt(opt1, 1)}${best === 1 ? '  ← mínimo</b>' : ''}\n${best === 2 ? '<b>' : ''}P1↔D2 + P2↔D1 = ${fmt(opt2, 1)}${best === 2 ? '  ← mínimo</b>' : ''}`;
+  }
+  document.querySelectorAll('#asg input').forEach((i) => i.addEventListener('input', asg));
+  asg();
+
+  /* ---------- 6a. lado da linha ---------- */
+  const linesvg = $('linesvg');
+  let P1 = { x: 0, y: 5 }, P2 = { x: 10, y: 5 }, C = { x: 5, y: 2 };
+  const LX = (x) => 20 + x * 18, LY = (y) => 110 - y * 10;   // grade 0–10 × 0–10
+  function lineDraw() {
+    linesvg.innerHTML = '';
+    const ink3 = css('--ink-3'), acc = css('--accent'), rule = css('--rule');
+    for (let i = 0; i <= 10; i += 2) {
+      linesvg.appendChild(el('line', { x1: LX(i), y1: LY(0), x2: LX(i), y2: LY(10), stroke: rule, 'stroke-width': .5 }));
+      linesvg.appendChild(el('line', { x1: LX(0), y1: LY(i), x2: LX(10), y2: LY(i), stroke: rule, 'stroke-width': .5 }));
+      linesvg.appendChild(el('text', { x: LX(i), y: LY(0) + 8, 'font-size': 6, 'text-anchor': 'middle', fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, i));
+      linesvg.appendChild(el('text', { x: LX(0) - 4, y: LY(i) + 2, 'font-size': 6, 'text-anchor': 'end', fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, i));
+    }
+    linesvg.appendChild(el('line', { x1: LX(P1.x), y1: LY(P1.y), x2: LX(P2.x), y2: LY(P2.y), stroke: acc, 'stroke-width': 2 }));
+    const ang = Math.atan2(LY(P2.y) - LY(P1.y), LX(P2.x) - LX(P1.x));
+    const ax = LX(P2.x), ay = LY(P2.y);
+    linesvg.appendChild(el('path', { d: `M${ax} ${ay} L${ax - 8 * Math.cos(ang - .4)} ${ay - 8 * Math.sin(ang - .4)} L${ax - 8 * Math.cos(ang + .4)} ${ay - 8 * Math.sin(ang + .4)} Z`, fill: acc }));
+    linesvg.appendChild(el('text', { x: LX(P1.x) + (P1.x < P2.x ? -2 : 2), y: LY(P1.y) - 6, 'font-size': 8, 'text-anchor': P1.x < P2.x ? 'start' : 'end', fill: acc, 'font-family': 'IBM Plex Mono, monospace' }, 'P1'));
+    linesvg.appendChild(el('text', { x: LX(P2.x) + (P2.x > P1.x ? 2 : -2), y: LY(P2.y) - 6, 'font-size': 8, 'text-anchor': P2.x > P1.x ? 'end' : 'start', fill: acc, 'font-family': 'IBM Plex Mono, monospace' }, 'P2'));
+    const s = (P2.x - P1.x) * (C.y - P1.y) - (P2.y - P1.y) * (C.x - P1.x);
+    const col = s > 0 ? css('--z-bancada') : (s < 0 ? css('--z-paletes') : ink3);
+    linesvg.appendChild(el('circle', { cx: LX(C.x), cy: LY(C.y), r: 4, fill: col }));
+    linesvg.appendChild(el('text', { x: LX(C.x) + 6, y: LY(C.y) + 3, 'font-size': 8, fill: col, 'font-family': 'IBM Plex Mono, monospace' }, `C (${C.x}, ${C.y})`));
+    $('lineout').innerHTML = `P1 = (${P1.x}, ${P1.y})  P2 = (${P2.x}, ${P2.y})  C = (${C.x}, ${C.y})\ns = (${P2.x}−${P1.x})(${C.y}−${P1.y}) − (${P2.y}−${P1.y})(${C.x}−${P1.x}) = <b>${s > 0 ? '+' : ''}${s}</b>  → lado <b>${s > 0 ? 'positivo' : (s < 0 ? 'negativo' : 'em cima da linha')}</b>`;
+  }
+  function svgPoint(svg, ev) {
+    const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+  linesvg.addEventListener('click', (ev) => {
+    const p = svgPoint(linesvg, ev);
+    C = { x: Math.max(0, Math.min(10, Math.round((p.x - 20) / 18))), y: Math.max(0, Math.min(10, Math.round((110 - p.y) / 10))) };
+    lineDraw();
+  });
+  $('line-flip').addEventListener('click', () => { const t = P1; P1 = P2; P2 = t; lineDraw(); });
+  lineDraw();
+
+  /* ---------- 6b. ray casting ---------- */
+  const raysvg = $('raysvg');
+  const POLY = [[0, 0], [6, 0], [6, 2], [2, 2], [2, 6], [0, 6]];
+  let Q = { x: 4, y: 4 };
+  const RX = (x) => 20 + x * 20, RY = (y) => 140 - y * 20;   // grade 0–6, sobra à direita para a semirreta
+  function rayDraw() {
+    raysvg.innerHTML = '';
+    const ink3 = css('--ink-3'), zb = css('--z-bancada'), acc = css('--accent'), rule = css('--rule'), crit = css('--crit');
+    for (let i = 0; i <= 6; i++) {
+      raysvg.appendChild(el('line', { x1: RX(i), y1: RY(0), x2: RX(i), y2: RY(6), stroke: rule, 'stroke-width': .5 }));
+      raysvg.appendChild(el('line', { x1: RX(0), y1: RY(i), x2: RX(6), y2: RY(i), stroke: rule, 'stroke-width': .5 }));
+      raysvg.appendChild(el('text', { x: RX(i), y: RY(0) + 8, 'font-size': 6, 'text-anchor': 'middle', fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, i));
+      raysvg.appendChild(el('text', { x: RX(0) - 4, y: RY(i) + 2, 'font-size': 6, 'text-anchor': 'end', fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, i));
+    }
+    raysvg.appendChild(el('polygon', { points: POLY.map(([x, y]) => RX(x) + ',' + RY(y)).join(' '), fill: zb, 'fill-opacity': .18, stroke: zb, 'stroke-width': 1.5 }));
+    raysvg.appendChild(el('text', { x: RX(.4), y: RY(5.2), 'font-size': 9, fill: zb, 'font-family': 'Barlow Condensed, sans-serif', 'font-weight': 700 }, 'bancada (L)'));
+    // cruzamentos
+    let n = 0; const hits = [];
+    for (let i = 0, j = POLY.length - 1; i < POLY.length; j = i++) {
+      const [xi, yi] = POLY[i], [xj, yj] = POLY[j];
+      if ((yi > Q.y) !== (yj > Q.y)) {
+        const xc = (xj - xi) * (Q.y - yi) / (yj - yi) + xi;
+        if (Q.x < xc) { n++; hits.push(xc); }
+      }
+    }
+    const inside = n % 2 === 1;
+    raysvg.appendChild(el('line', { x1: RX(Q.x), y1: RY(Q.y), x2: 215, y2: RY(Q.y), stroke: acc, 'stroke-width': 1, 'stroke-dasharray': '3 2' }));
+    hits.forEach((xc) => raysvg.appendChild(el('circle', { cx: RX(xc), cy: RY(Q.y), r: 3.2, fill: 'none', stroke: crit, 'stroke-width': 1.5 })));
+    raysvg.appendChild(el('circle', { cx: RX(Q.x), cy: RY(Q.y), r: 4, fill: inside ? css('--good') : crit }));
+    raysvg.appendChild(el('text', { x: RX(Q.x) + 5, y: RY(Q.y) - 5, 'font-size': 8, fill: inside ? css('--good') : crit, 'font-family': 'IBM Plex Mono, monospace' }, `(${Q.x}, ${Q.y})`));
+    $('rayout').innerHTML = `ponto (${Q.x}, ${Q.y}) → semirreta para a direita cruza <b>${n}</b> aresta(s)\n${n} é ${n % 2 ? 'ímpar' : 'par'} → <b class="${inside ? 'ok' : 'bad'}">${inside ? 'dentro' : 'fora'}</b>`;
+  }
+  raysvg.addEventListener('click', (ev) => {
+    const p = svgPoint(raysvg, ev);
+    Q = { x: Math.max(0, Math.min(6, Math.round(((p.x - 20) / 20) * 2) / 2)), y: Math.max(0, Math.min(6, Math.round(((140 - p.y) / 20) * 2) / 2)) };
+    // evita cair exatamente sobre uma aresta horizontal (ambíguo)
+    if (Number.isInteger(Q.y) && [0, 2, 6].includes(Q.y)) Q.y += .5;
+    if (Q.y > 6) Q.y = 5.5;
+    rayDraw();
+  });
+  rayDraw();
+
+  /* ---------- 7. pinhole ---------- */
+  const pinsvg = $('pinsvg');
+  function pin() {
+    const Z = +$('zdist').value, f = 1000, H = 0.4, h = f * H / Z;
+    $('zo').value = fmt(Z, 1) + ' m';
+    pinsvg.innerHTML = '';
+    const ink3 = css('--ink-3'), zp = css('--z-paletes'), acc = css('--accent'), rule = css('--rule');
+    // câmera à esquerda, cesta a Z metros; sensor mostra altura h
+    const camX = 30, groundY = 110;
+    pinsvg.appendChild(el('line', { x1: 20, y1: groundY, x2: 300, y2: groundY, stroke: rule }));
+    pinsvg.appendChild(el('rect', { x: camX - 8, y: groundY - 22, width: 16, height: 12, fill: ink3 }));
+    pinsvg.appendChild(el('text', { x: camX, y: groundY + 12, 'font-size': 8, 'text-anchor': 'middle', fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, 'câmera'));
+    const objX = camX + Z * 30, objH = 40;
+    pinsvg.appendChild(el('rect', { x: objX - 8, y: groundY - objH, width: 16, height: objH, fill: zp, 'fill-opacity': .35, stroke: zp }));
+    pinsvg.appendChild(el('text', { x: objX, y: groundY + 12, 'font-size': 8, 'text-anchor': 'middle', fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, 'Z = ' + fmt(Z, 1) + ' m'));
+    pinsvg.appendChild(el('line', { x1: camX, y1: groundY - 16, x2: objX - 8, y2: groundY - objH, stroke: acc, 'stroke-width': .8, 'stroke-dasharray': '2 2' }));
+    pinsvg.appendChild(el('line', { x1: camX, y1: groundY - 16, x2: objX - 8, y2: groundY, stroke: acc, 'stroke-width': .8, 'stroke-dasharray': '2 2' }));
+    // "sensor" à direita: barra proporcional a h
+    const sx = 285, top = 12, maxH = 90, bar = Math.min(maxH, h * maxH / 400);
+    pinsvg.appendChild(el('rect', { x: sx, y: top, width: 10, height: maxH, fill: 'none', stroke: rule }));
+    pinsvg.appendChild(el('rect', { x: sx, y: top + maxH - bar, width: 10, height: bar, fill: acc }));
+    pinsvg.appendChild(el('text', { x: sx + 5, y: top + maxH + 10, 'font-size': 7, 'text-anchor': 'middle', fill: ink3, 'font-family': 'IBM Plex Mono, monospace' }, 'px'));
+    pinsvg.appendChild(el('text', { x: sx - 4, y: top + maxH - bar + 3, 'font-size': 9, 'text-anchor': 'end', fill: acc, 'font-family': 'IBM Plex Mono, monospace', 'font-weight': 600 }, Math.round(h) + ' px'));
+    $('pinout').innerHTML = `h = f · H / Z = 1000 · 0,40 / ${fmt(Z, 1)} = <b>${fmt(h, 0)} px</b>\nregra "1,6× a média" com média em 4 m (100 px): ${h >= 160 ? '<span class="wn">esta cesta única já pareceria pilha de 2</span>' : 'cesta única'}`;
+  }
+  $('zdist').addEventListener('input', pin);
+  pin();
+
+  /* ---------- 8. reconciliação ---------- */
+  function rc() {
+    const pb = +$('rc-pb').value || 0, pf = +$('rc-pf').value || 0, bf = +$('rc-bf').value || 0;
+    const pal = +$('rc-pal').value || 0, val = +$('rc-val').value || 0, vis = +$('rc-vis').value || 0;
+    const A = pb + pf, B = bf + pf, C = A - B, D = pal * 40, E = val;
+    const line = (lbl, a, b, tol) => { const d = a - b; const ok = Math.abs(d) <= tol; return `${lbl}  ${a} × ${b}  →  <span class="${ok ? 'ok' : 'bad'}">${ok ? 'OK' : 'DIVERGÊNCIA ' + (d > 0 ? '+' : '') + d}</span>`; };
+    $('rcout').innerHTML = `A processadas = ${pb} + ${pf} = <b>${A}</b>     B entregues = ${bf} + ${pf} = <b>${B}</b>     C saldo = <b>${C}</b>\nD esperado = ${pal} × 40 = ${D}     E vales = ${E}\n\n${line('A ≈ D', A, D, 0)}\n${line('B ≈ E', B, E, 0)}\n${line('C ≈ visíveis', C, vis, 0)}`;
+  }
+  ['rc-pb', 'rc-pf', 'rc-bf', 'rc-pal', 'rc-val', 'rc-vis'].forEach((id) => $(id).addEventListener('input', rc));
+  rc();
+
+  /* redesenha os SVGs se o tema mudar (cores vêm dos tokens) */
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const redraw = () => { gdDraw(); iou(); lineDraw(); rayDraw(); pin(); conv(); };
+  if (mq.addEventListener) mq.addEventListener('change', redraw);
+  new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+</body>
+</html>

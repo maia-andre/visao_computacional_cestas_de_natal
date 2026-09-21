@@ -1,0 +1,555 @@
+<title>Tenda Inteligente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #eef1f5;
+    --bg-2: #ffffff;
+    --bg-3: #e2e6ec;
+    --ink: #17202b;
+    --ink-2: #4a5665;
+    --ink-3: #7b8794;
+    --line: #cfd6df;
+    --accent: #6a4cf0;
+    --accent-ink: #ffffff;
+    --z-paletes: #d98b1f;
+    --z-bancada: #1f9a8a;
+    --z-fora: #3f6fb5;
+    --good: #1f8a4c;
+    --warn: #c98a00;
+    --crit: #c93a3a;
+    --stage: #0f141b;
+    --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+    --font-body: "Barlow", "Segoe UI", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141a22; --bg-2: #1b232d; --bg-3: #232d39;
+      --ink: #eef1f5; --ink-2: #b4bec9; --ink-3: #7f8b98; --line: #2f3a47;
+      --accent: #8a6cff; --accent-ink: #0f141b;
+      --z-paletes: #f2a541; --z-bancada: #2ec4b0; --z-fora: #6fa0ea;
+      --good: #3fc26f; --warn: #f0b429; --crit: #ef6363;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141a22; --bg-2: #1b232d; --bg-3: #232d39;
+    --ink: #eef1f5; --ink-2: #b4bec9; --ink-3: #7f8b98; --line: #2f3a47;
+    --accent: #8a6cff; --accent-ink: #0f141b;
+    --z-paletes: #f2a541; --z-bancada: #2ec4b0; --z-fora: #6fa0ea;
+    --good: #3fc26f; --warn: #f0b429; --crit: #ef6363;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+    padding-inline: clamp(16px, 3vw, 40px); padding-block: 0 48px;
+  }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.05; margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  .wrap { max-width: 1280px; margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+  .mast {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px;
+    padding-block: 22px 16px; border-bottom: 1px solid var(--line);
+  }
+  .mast h1 { font-size: clamp(30px, 4vw, 44px); font-weight: 700; letter-spacing: .01em; }
+  .mast h1 span { color: var(--accent); }
+  .eyebrow { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: 13px; color: var(--ink-3); }
+  .mast .sub { color: var(--ink-2); max-width: 56ch; }
+
+  /* ---------- hero: stage + panel ---------- */
+  .hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(300px, 4fr); gap: 20px; margin-top: 22px; }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+
+  .stage { background: var(--stage); border-radius: 6px; overflow: hidden; position: relative; }
+  .stage svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  .stage .chip {
+    position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; align-items: center;
+    background: rgba(15,20,27,.78); color: #eef1f5; border: 1px solid rgba(255,255,255,.14);
+    padding: 6px 10px; border-radius: 4px; font-family: var(--font-display); font-size: 15px; letter-spacing: .04em; text-transform: uppercase;
+  }
+  .stage .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef6363; box-shadow: 0 0 0 3px rgba(239,99,99,.25); }
+  .stage .clock { position: absolute; top: 12px; right: 12px; font-family: var(--font-mono); font-size: 13px; color: #eef1f5; background: rgba(15,20,27,.78); padding: 6px 8px; border-radius: 4px; }
+  .stage .legend { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: #eef1f5; background: rgba(15,20,27,.78); padding: 6px 10px; border-radius: 4px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+  .closing {
+    position: absolute; inset: 0; display: grid; place-items: center; background: rgba(15,20,27,.82); color: #eef1f5; padding: 16px;
+  }
+  .closing .card { background: #1b232d; border: 1px solid #2f3a47; border-radius: 6px; padding: 18px 20px; min-width: min(420px, 100%); }
+  .closing h3 { font-size: 26px; margin-bottom: 10px; }
+  .ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .ledger td { padding: 6px 4px; border-top: 1px solid #2f3a47; }
+  .ledger td:first-child { color: #b4bec9; }
+  .ledger td.num { text-align: right; font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+  .ledger td.ok { color: #3fc26f; text-align: right; width: 34px; }
+
+  .panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .chapter { border-left: 3px solid var(--accent); padding-left: 12px; }
+  .chapter h2 { font-size: 26px; font-weight: 600; }
+  .chapter p { color: var(--ink-2); font-size: 15px; }
+
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .kpi .l { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 600; }
+  .kpi .v { font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .kpi .s { font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .kpi.wide { grid-column: span 2; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+  .bar { height: 6px; background: var(--bg-3); border-radius: 3px; overflow: hidden; flex: 1; }
+  .bar i { display: block; height: 100%; background: var(--z-paletes); width: 0; transition: width .3s; }
+  .kpi.mismatch .v { color: var(--crit); }
+
+  .alert { display: none; border-radius: 4px; padding: 10px 12px; font-size: 14px; border: 1px solid; gap: 10px; align-items: flex-start; }
+  .alert.show { display: flex; }
+  .alert.crit { border-color: var(--crit); background: color-mix(in srgb, var(--crit) 12%, var(--bg-2)); }
+  .alert.good { border-color: var(--good); background: color-mix(in srgb, var(--good) 12%, var(--bg-2)); }
+  .alert b { font-family: var(--font-display); font-size: 16px; letter-spacing: .02em; text-transform: uppercase; display: block; }
+
+  .log { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.55; min-height: 180px; }
+  .log .h { color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; font-size: 11px; margin-bottom: 4px; font-family: var(--font-body); font-weight: 600; }
+  .log div.e { display: flex; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .log .t { color: var(--ink-3); }
+  .log .id { color: var(--accent); }
+  .log .an { text-decoration: line-through; color: var(--ink-3); }
+  .log .tag { color: var(--warn); }
+  .log .tag2 { color: var(--z-fora); }
+  .log .tag3 { color: var(--good); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button { font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid var(--line); background: var(--bg-2); color: var(--ink); padding: 7px 12px; }
+  button:hover { background: var(--bg-3); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; min-width: 96px; }
+  .chapters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chapters button { font-family: var(--font-display); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; padding: 5px 9px; }
+  .chapters button[aria-current="true"] { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- sections ---------- */
+  section.s { margin-top: 48px; }
+  section.s > .eyebrow { margin-bottom: 8px; }
+  section.s h2 { font-size: clamp(26px, 3vw, 34px); font-weight: 600; margin-bottom: 14px; }
+  .lead { color: var(--ink-2); max-width: 64ch; margin-bottom: 18px; }
+
+  .rail { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  @media (max-width: 900px) { .rail { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .rail { grid-template-columns: 1fr; } }
+  .step { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .step .n { font-family: var(--font-display); font-size: 13px; letter-spacing: .1em; color: var(--accent); font-weight: 700; }
+  .step h3 { font-size: 21px; font-weight: 600; }
+  .step p { font-size: 14px; color: var(--ink-2); }
+  .step code { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); background: var(--bg-3); padding: 1px 5px; border-radius: 3px; }
+
+  .five { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; max-width: 900px; }
+  .five th, .five td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .five th { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  .five td.k { font-family: var(--font-display); font-size: 22px; font-weight: 700; width: 40px; color: var(--accent); }
+  .five td.src { color: var(--ink-2); font-size: 14px; white-space: nowrap; }
+  .five .eq { font-family: var(--font-mono); color: var(--ink-3); }
+  .tblwrap { overflow-x: auto; }
+
+  .phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 900px) { .phases { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .phases { grid-template-columns: 1fr; } }
+  .ph { border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; background: var(--bg-2); display: flex; flex-direction: column; gap: 4px; }
+  .ph .st { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  .ph.done .st { color: var(--good); }
+  .ph.next .st { color: var(--warn); }
+  .ph.later .st { color: var(--ink-3); }
+  .ph h3 { font-size: 20px; font-weight: 600; }
+  .ph p { font-size: 14px; color: var(--ink-2); }
+
+  .note { border: 1px dashed var(--line); border-radius: 4px; padding: 14px 16px; max-width: 72ch; color: var(--ink-2); font-size: 15px; }
+  .note b { color: var(--ink); }
+  footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13px; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+
+  @media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <div class="eyebrow">Cestas de Natal · visão computacional · proposta</div>
+      <h1>Tenda <span>Inteligente</span></h1>
+    </div>
+    <p class="sub">Uma câmera sobre a bancada conta cada cesta que sai do palete e cada cesta entregue — e avisa na hora quando a conta não fecha.</p>
+  </header>
+
+  <div class="hero">
+    <div class="stage" id="stage">
+      <svg viewBox="0 0 960 880" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-label="Simulação da câmera da tenda sobre a foto da bancada">
+        <image href="mesa.jpg" x="0" y="0" width="960" height="880" preserveAspectRatio="xMidYMid slice"></image>
+        <g id="zones"></g>
+        <g id="traces"></g>
+        <g id="baskets"></g>
+        <g id="zoneLabels"></g>
+      </svg>
+      <div class="chip"><span class="dot"></span><span id="chipText">Câmera 1 · Tenda</span></div>
+      <div class="clock" id="clock">14:32:00</div>
+      <div class="legend">
+        <span><i style="background:var(--z-paletes)"></i>paletes</span>
+        <span><i style="background:var(--z-bancada)"></i>bancada</span>
+        <span><i style="background:var(--z-fora)"></i>fora (funcionário / carro)</span>
+        <span><i style="background:var(--accent)"></i>detecção + id</span>
+      </div>
+      <div class="closing" id="closing" hidden>
+        <div class="card">
+          <div class="eyebrow" style="color:#7f8b98">Fechamento do turno · simulado</div>
+          <h3>Cinco números, uma conta</h3>
+          <table class="ledger" id="ledger"></table>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div class="chapter">
+        <div class="eyebrow" id="chapNum">Capítulo 1 de 6</div>
+        <h2 id="chapTitle">Fluxo normal</h2>
+        <p id="chapText">Operador tira do palete e põe na bancada; funcionário entrega o vale e leva. Cada mudança de zona vira um evento.</p>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><span class="l">Processadas</span><span class="v" id="kA">0</span><span class="s">saíram do palete</span></div>
+        <div class="kpi"><span class="l">Entregues</span><span class="v" id="kB">0</span><span class="s" id="kBs">0 diretas</span></div>
+        <div class="kpi" id="kpiC"><span class="l">Na bancada</span><span class="v"><span id="kC">4</span></span><span class="s">contado · <span id="kCv">4</span> visível</span></div>
+        <div class="kpi"><span class="l">Vales recebidos</span><span class="v" id="kE">0</span><span class="s">contador sem câmera</span></div>
+        <div class="kpi wide"><div><span class="l">Palete <span id="kPal">PALLET-00012</span></span><div class="s"><b id="kD">32</b> / 40</div></div><div class="bar"><i id="kDbar"></i></div></div>
+      </div>
+
+      <div class="alert" id="alert"><div id="alertBody"></div></div>
+
+      <div class="log"><div class="h">Eventos · a trilha de auditoria</div><div id="log"></div></div>
+
+      <div class="controls">
+        <button class="primary" id="btnPlay">Pausar</button>
+        <button id="btnSpeed">1×</button>
+        <div class="chapters" id="chapters"></div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="s">
+    <div class="eyebrow">Como funciona</div>
+    <h2>Da imagem ao evento, em cinco passos</h2>
+    <p class="lead">A câmera não "entende a operação". Ela responde uma pergunta simples, trinta vezes por segundo: <em>em que zona está cada cesta?</em> O resto é regra de negócio.</p>
+    <div class="rail">
+      <div class="step"><span class="n">DETECÇÃO</span><h3>Onde estão as cestas?</h3><p>Um modelo YOLO treinado com fotos da própria operação devolve uma caixa por cesta.</p><code>cesta 0.92</code></div>
+      <div class="step"><span class="n">TRACKING</span><h3>É a mesma cesta?</h3><p>ByteTrack dá um número a cada objeto e o segue de frame em frame. Sem isso, a mesma cesta seria contada trinta vezes.</p><code>#41</code></div>
+      <div class="step"><span class="n">ZONAS</span><h3>Em que zona está?</h3><p>Polígonos desenhados sobre a imagem: paletes, bancada (em L ou reta) e fora. Mudou de zona e ficou: transição.</p><code>paletes->bancada</code></div>
+      <div class="step"><span class="n">REGRAS</span><h3>Isso conta?</h3><p>Vai-e-volta em menos de 4 s se anula. Pilha de 2 conta 2. Palete → fora sem passar pela bancada é entrega direta.</p><code>anulado · direta · ×2</code></div>
+      <div class="step"><span class="n">REGISTRO</span><h3>Guardar a prova</h3><p>Cada evento vai para o banco com hora, id, transição e o frame anotado. Toda divergência tem endereço.</p><code>eventos.sqlite</code></div>
+    </div>
+  </section>
+
+  <section class="s">
+    <div class="eyebrow">Conferência</div>
+    <h2>Cinco números que precisam bater</h2>
+    <p class="lead">Três vêm da câmera, dois vêm da operação como ela já é. Cada par que não fecha vira uma ocorrência — com snapshots — em vez de uma diferença descoberta no fim do dia.</p>
+    <div class="tblwrap">
+    <table class="five">
+      <thead><tr><th></th><th>Número</th><th>Origem</th><th>Deve bater com</th></tr></thead>
+      <tbody>
+        <tr><td class="k">A</td><td>Processadas <span class="eq">= paletes→bancada + paletes→fora</span></td><td class="src">câmera</td><td>D</td></tr>
+        <tr><td class="k">B</td><td>Entregues <span class="eq">= bancada→fora + paletes→fora (+ lotes declarados)</span></td><td class="src">câmera</td><td>E</td></tr>
+        <tr><td class="k">C</td><td>Saldo na bancada <span class="eq">= A − B</span></td><td class="src">câmera (derivado)</td><td>cestas visíveis na bancada agora</td></tr>
+        <tr><td class="k">D</td><td>Esperado <span class="eq">= paletes esvaziados × 40</span></td><td class="src">operação (5 camadas × 8)</td><td>A</td></tr>
+        <tr><td class="k">E</td><td>Vales recolhidos</td><td class="src">operação (papel)</td><td>B</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="s">
+    <div class="eyebrow">Plano</div>
+    <h2>Onde estamos</h2>
+    <div class="phases">
+      <div class="ph done"><span class="st">Feito · 14/09</span><h3>Fase 0 · Teste zero</h3><p>Pipeline completo rodando num vídeo público: detecção, tracking, zonas, vai-e-volta e banco de eventos.</p></div>
+      <div class="ph next"><span class="st">Próxima</span><h3>Fase 1 · Ensaio</h3><p>Celular fixo, 3–4 pessoas, 20–40 cestas, 5 roteiros (normal, vai-e-volta, pilhas, entrega direta, pico) com contagem manual.</p></div>
+      <div class="ph later"><span class="st">Depois</span><h3>Fase 2 · Modelo</h3><p>~300 frames anotados; YOLO aprende <em>cesta</em>, <em>pilha2</em> e <em>palete</em>. Meta: mAP ≥ 0,85.</p></div>
+      <div class="ph later"><span class="st">Depois</span><h3>Fase 3 · Câmera da tenda</h3><p>Zonas sobre o L. Erro ≤ 5% nos vídeos antes de comprar a câmera; 1 h real ≥ 95% antes de confiar.</p></div>
+      <div class="ph later"><span class="st">Depois</span><h3>Fase 4 · Reconciliação</h3><p>Palete × 40, vales, entregas em lote, divergências com snapshot.</p></div>
+      <div class="ph later"><span class="st">Depois</span><h3>Fase 5 · Painel</h3><p>A tela da tenda: processadas, entregues, saldo, divergências abertas, cestas por hora.</p></div>
+    </div>
+  </section>
+
+  <section class="s">
+    <div class="eyebrow">Transparência</div>
+    <h2>O que é real nesta vitrine</h2>
+    <p class="note"><b>As cestas são desenhadas</b> — a detecção por IA entra na Fase 2, depois de gravar a operação. <b>As regras são as do código real</b>: zonas, confirmação de transição, anulação de vai-e-volta, entrega direta e a conferência contado × visível já rodam no protótipo (Fase 0). A foto é da mesa usada em 2025, que na tenda vira um L; a pessoa ao fundo foi desfocada. Os números começam de um turno em andamento para caber em um minuto.</p>
+  </section>
+
+  <footer>
+    <span>Projeto Cestas de Natal · visão computacional aplicada à logística</span>
+    <span>Simulação · setembro de 2026</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  // ---------- geometria (coordenadas da foto recortada, 960×880) ----------
+  const ZONES = [
+    { name: "bancada", color: "var(--z-bancada)", pts: [[415,280],[530,280],[770,605],[170,605]], label: [640, 470] },
+    { name: "paletes", color: "var(--z-paletes)", pts: [[0,340],[400,300],[260,880],[0,880]],     label: [90, 430] },
+    { name: "fora",    color: "var(--z-fora)",    pts: [[545,300],[960,430],[960,880],[720,880]], label: [830, 780] },
+  ];
+  const S = { 1:[300,545], 2:[370,490], 3:[430,440], 4:[480,395], 5:[520,350], 6:[345,520] };
+  const P1 = [70,560], P2 = [60,640], F = [860,640], EXIT = [1010,700], VIA = [430,750], F2 = [900,790], EXIT2 = [1030,830];
+
+  // ---------- roteiro ----------
+  // cada cesta: id, kfs [[t,x,y],...], until (some do quadro), stack, merges, vanish
+  const T_LOOP = 66;
+  const CHAPTERS = [
+    { t: 0,  title: "Fluxo normal",      text: "Operador tira do palete e põe na bancada; funcionário entrega o vale e leva. Cada mudança de zona vira um evento." },
+    { t: 16, title: "Vai-e-volta",       text: "A cesta #45 entra na bancada e volta ao palete em 2 s: foi ajeitada, não movimentada. Os dois eventos se anulam sozinhos." },
+    { t: 24, title: "Pilha de 2",        text: "Funcionário empilha duas e leva de uma vez. O modelo reconhece a pilha como uma classe própria e conta duas entregas." },
+    { t: 32, title: "Entrega direta",    text: "Funcionário com vários vales encosta o carro. As cestas vão do palete para fora sem passar pela bancada — contadas e marcadas como diretas." },
+    { t: 44, title: "Divergência",       text: "Uma cesta some da bancada sem que a câmera veja a saída. O saldo contado deixa de bater com o visível: alerta com snapshot, antes do fim do turno." },
+    { t: 58, title: "Fechamento",        text: "Câmera e operação fecham a conta: processadas × palete, entregues × vales, saldo × visível. Onde diferem, há um snapshot para olhar." },
+  ];
+
+  function mv(from, to, t0, dur) { return [[t0, ...from], [t0 + dur, ...to]]; }
+  const BASKETS = [
+    { id: 37, kfs: [[0, ...S[2]], ...mv(S[2], F, 11, 2.2), [14.2, ...EXIT]], until: 14.2 },
+    { id: 38, kfs: [[0, ...S[3]], ...mv(S[3], F, 3, 2.2),  [6.2, ...EXIT]],  until: 6.2 },
+    { id: 39, kfs: [[0, ...S[4]]] },
+    { id: 40, kfs: [[0, ...S[5]], ...mv(S[5], F, 7, 2.2),  [10.2, ...EXIT]], until: 10.2 },
+    { id: 41, kfs: [...mv(P1, S[1], 1, 2.2), ...mv(S[1], F, 15, 2.2), [18.2, ...EXIT]], until: 18.2 },
+    { id: 42, kfs: mv(P1, S[3], 5, 2.2) },
+    { id: 43, kfs: mv(P1, S[5], 9, 2.2), vanish: 46 },
+    { id: 44, kfs: mv(P1, S[2], 13, 2.2) },
+    // vai-e-volta
+    { id: 45, kfs: [...mv(P1, S[1], 17, 2.2), ...mv(S[1], P1, 19.6, 1.8), ...mv(P1, S[1], 22, 2.0), ...mv(S[1], F, 28.5, 2.4), [31.9, ...EXIT]], until: 31.9, stackAt: 27.9 },
+    // pilha: 46 vai para cima da 45 e some (vira pilha2)
+    { id: 46, kfs: [...mv(P1, S[6], 24.5, 2.0), ...mv(S[6], S[1], 27, 0.9)], until: 27.9 },
+    // entrega direta
+    { id: 47, kfs: [[33, ...P2], [35, ...VIA], [37.2, ...F2], [38.2, ...EXIT2]], until: 38.2 },
+    { id: 48, kfs: [[36.5, ...P2], [38.5, ...VIA], [40.7, ...F2], [41.7, ...EXIT2]], until: 41.7 },
+    { id: 49, kfs: [[40, ...P2], [42, ...VIA], [44.2, ...F2], [45.2, ...EXIT2]], until: 45.2 },
+  ];
+  const EXTRA = [ // eventos que não são de câmera
+    { t: 46,   kind: "vale",  text: "vale recebido (#43)" },
+    { t: 49,   kind: "alert" },
+    { t: 54,   kind: "adjust" },
+  ];
+
+  // ---------- simulação ----------
+  const CONFIRM = 0.18, VAI_E_VOLTA = 4.0, DT = 1 / 30;
+  let sim, t = 0, playing = true, speed = 1, last = null;
+
+  function inPoly(pt, poly) {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [xi, yi] = poly[i], [xj, yj] = poly[j];
+      if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  function zoneOf(pt) { for (const z of ZONES) if (inPoly(pt, z.pts)) return z.name; return "fora"; }
+  function posAt(b, tt) {
+    const k = b.kfs;
+    if (tt <= k[0][0]) return [k[0][1], k[0][2]];
+    for (let i = 1; i < k.length; i++) {
+      if (tt <= k[i][0]) {
+        const a = k[i - 1], c = k[i], u = (tt - a[0]) / Math.max(c[0] - a[0], 1e-6);
+        return [a[1] + (c[1] - a[1]) * u, a[2] + (c[2] - a[2]) * u];
+      }
+    }
+    const e = k[k.length - 1]; return [e[1], e[2]];
+  }
+  function exists(b, tt) { return tt >= b.kfs[0][0] && (b.until == null || tt < b.until) && (b.vanish == null || tt < b.vanish); }
+
+  function reset() {
+    sim = {
+      st: {}, events: [], extras: new Set(), A: 0, B: 0, direct: 0, E: 0, adjust: 0,
+      pal: 32, palName: 12, palDone: [], alert: null, traces: {},
+    };
+    t = 0;
+  }
+  function clock(tt) { const s = 14 * 3600 + 32 * 60 + Math.floor(tt); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), q = s % 60; return `${h}:${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`; }
+
+  function pushEvent(e) { sim.events.unshift(e); if (sim.events.length > 60) sim.events.pop(); }
+
+  function applyTransition(b, de, para, tt) {
+    const stack = b.stackAt != null && tt >= b.stackAt ? 2 : 1;
+    const dir = `${de}->${para}`, inv = `${para}->${de}`;
+    const prev = sim.events.find(e => e.id === b.id && e.kind === "cam" && !e.anulado);
+    let anulado = false;
+    if (prev && prev.dir === inv && tt - prev.t <= VAI_E_VOLTA) { prev.anulado = true; anulado = true; undoCount(prev); }
+    const ev = { kind: "cam", id: b.id, dir, de, para, t: tt, anulado, stack, direta: de === "paletes" && para === "fora" };
+    pushEvent(ev);
+    if (!anulado) count(ev, +1);
+  }
+  function count(ev, sign) {
+    const n = ev.stack * sign;
+    if (ev.de === "paletes" && (ev.para === "bancada" || ev.para === "fora")) { sim.A += n; palStep(n); }
+    if (ev.para === "fora" && (ev.de === "bancada" || ev.de === "paletes")) { sim.B += n; sim.E += n; if (ev.direta) sim.direct += n; }
+    if (ev.de === "bancada" && ev.para === "paletes") { sim.A -= n; palStep(-n); }
+    if (ev.de === "fora" && ev.para === "bancada") { sim.B -= n; sim.E -= n; }
+  }
+  function undoCount(ev) { count(ev, -1); }
+  function palStep(n) {
+    sim.pal += n;
+    if (sim.pal >= 40) { sim.palDone.push(sim.palName); pushEvent({ kind: "pal", t: t, text: `PALLET-${String(sim.palName).padStart(5,"0")} esvaziado · 40/40` }); sim.palName += 1; sim.pal -= 40; }
+  }
+
+  function step() {
+    const tt = t + DT;
+    for (const b of BASKETS) {
+      const st = sim.st[b.id];
+      if (!exists(b, tt)) { if (st && b.until != null && tt >= b.until && !st.gone) st.gone = true; continue; }
+      const p = posAt(b, tt), z = zoneOf(p);
+      (sim.traces[b.id] ||= []).push(p); if (sim.traces[b.id].length > 28) sim.traces[b.id].shift();
+      if (!st) { sim.st[b.id] = { zone: z, cand: z, since: tt }; continue; }
+      if (z !== st.cand) { st.cand = z; st.since = tt; }
+      if (st.cand !== st.zone && tt - st.since >= CONFIRM) { applyTransition(b, st.zone, st.cand, tt); st.zone = st.cand; }
+    }
+    for (const x of EXTRA) {
+      if (tt >= x.t && !sim.extras.has(x)) {
+        sim.extras.add(x);
+        if (x.kind === "vale") { sim.E += 1; pushEvent({ kind: "vale", t: tt, text: x.text }); }
+        if (x.kind === "alert") sim.alert = { level: "crit", title: "Divergência na bancada", dyn: true };
+        if (x.kind === "adjust") { sim.adjust += 1; sim.B += 1; pushEvent({ kind: "adj", t: tt, text: "ajuste manual: +1 entregue (saída não vista pela câmera)" }); sim.alert = { level: "good", title: "Divergência resolvida", text: "Operador conferiu a bancada: 4. Cesta #43 saiu por baixo do enquadramento. Ajuste registrado com quem e quando." }; }
+      }
+    }
+    t = tt;
+    if (t >= T_LOOP) reset();
+  }
+  function seek(target) { reset(); while (t < target) step(); }
+
+  // ---------- render ----------
+  const $ = id => document.getElementById(id);
+  const svgNS = "http://www.w3.org/2000/svg";
+  const gZones = $("zones"), gTraces = $("traces"), gBaskets = $("baskets"), gLabels = $("zoneLabels");
+  for (const z of ZONES) {
+    const p = document.createElementNS(svgNS, "polygon");
+    p.setAttribute("points", z.pts.map(q => q.join(",")).join(" "));
+    p.setAttribute("fill", z.color); p.setAttribute("fill-opacity", "0.16"); p.setAttribute("stroke", z.color); p.setAttribute("stroke-width", "3");
+    gZones.appendChild(p);
+    const l = document.createElementNS(svgNS, "text");
+    l.setAttribute("x", z.label[0]); l.setAttribute("y", z.label[1]); l.setAttribute("fill", z.color);
+    l.setAttribute("font-family", "Barlow Condensed, Arial Narrow, sans-serif"); l.setAttribute("font-size", "30"); l.setAttribute("font-weight", "700"); l.setAttribute("letter-spacing", "1");
+    l.setAttribute("paint-order", "stroke"); l.setAttribute("stroke", "#0f141b"); l.setAttribute("stroke-width", "5"); l.setAttribute("stroke-linejoin", "round");
+    l.dataset.zone = z.name; gLabels.appendChild(l);
+  }
+  function scale(y) { return 0.42 + 0.62 * Math.min(Math.max((y - 280) / 600, 0), 1); }
+  function basketSVG(b, p, id, stack, conf) {
+    const s = scale(p[1]);
+    const g = document.createElementNS(svgNS, "g");
+    g.setAttribute("transform", `translate(${p[0].toFixed(1)} ${p[1].toFixed(1)}) scale(${s.toFixed(3)})`);
+    let body = "";
+    for (let i = stack - 1; i >= 0; i--) {
+      const dy = -i * 40;
+      body += `<rect x="-38" y="${-22 + dy}" width="76" height="46" rx="6" fill="#b3261e" stroke="#5c120e" stroke-width="2"/>
+        <rect x="-38" y="${-8 + dy}" width="76" height="9" fill="#e0b13c"/>
+        <rect x="-30" y="${-16 + dy}" width="22" height="30" rx="4" fill="#ffffff" fill-opacity="0.22"/>
+        <path d="M -18 ${-22 + dy} Q 0 ${-46 + dy} 18 ${-22 + dy}" fill="none" stroke="#5c120e" stroke-width="4"/>`;
+    }
+    const top = -22 - (stack - 1) * 40 - 26, h = 46 + (stack - 1) * 40 + 26;
+    const cls = stack === 2 ? "pilha2" : "cesta";
+    body += `<rect x="-46" y="${top - 4}" width="92" height="${h + 8}" fill="none" stroke="var(--accent)" stroke-width="3"/>
+      <rect x="-46" y="${top - 28}" width="${cls === "pilha2" ? 116 : 104}" height="24" fill="var(--accent)"/>
+      <text x="-40" y="${top - 10}" fill="#0f141b" font-family="IBM Plex Mono, Consolas, monospace" font-size="17" font-weight="500">#${id} ${cls} ${conf}</text>`;
+    g.innerHTML = body;
+    return g;
+  }
+  const speedOpts = [1, 2, 0.5];
+  const logEl = $("log"), alertEl = $("alert"), alertBody = $("alertBody");
+
+  function render() {
+    // zonas: contagem visível
+    const vis = { paletes: 0, bancada: 0, fora: 0 };
+    const live = [];
+    for (const b of BASKETS) if (exists(b, t)) { const p = posAt(b, t); const z = zoneOf(p); vis[z]++; live.push({ b, p, z }); }
+    live.sort((a, c) => a.p[1] - c.p[1]);
+    gBaskets.replaceChildren(...live.map(({ b, p }) => basketSVG(b, p, b.id, b.stackAt != null && t >= b.stackAt ? 2 : 1, (0.86 + (b.id % 7) * 0.017).toFixed(2))));
+    gTraces.replaceChildren(...live.filter(({ b }) => (sim.traces[b.id] || []).length > 2).map(({ b }) => {
+      const pl = document.createElementNS(svgNS, "polyline");
+      pl.setAttribute("points", sim.traces[b.id].map(q => `${q[0].toFixed(0)},${q[1].toFixed(0)}`).join(" "));
+      pl.setAttribute("fill", "none"); pl.setAttribute("stroke", "var(--accent)"); pl.setAttribute("stroke-width", "3"); pl.setAttribute("stroke-opacity", "0.7"); pl.setAttribute("stroke-linecap", "round");
+      return pl;
+    }));
+    for (const l of gLabels.children) { const n = l.dataset.zone; l.textContent = n === "fora" ? "fora" : `${n} · ${vis[n]}`; }
+
+    // capítulo
+    let ci = 0; for (let i = 0; i < CHAPTERS.length; i++) if (t >= CHAPTERS[i].t) ci = i;
+    $("chapNum").textContent = `Capítulo ${ci + 1} de ${CHAPTERS.length}`;
+    $("chapTitle").textContent = CHAPTERS[ci].title; $("chapText").textContent = CHAPTERS[ci].text;
+    $("chipText").textContent = `Câmera 1 · Tenda · ${CHAPTERS[ci].title}`;
+    for (const btn of $("chapters").children) btn.setAttribute("aria-current", String(+btn.dataset.i === ci));
+    $("clock").textContent = clock(t);
+
+    // KPIs
+    const C = sim.A - sim.B + 4; // 4 já estavam na bancada no início do turno simulado
+    $("kA").textContent = sim.A; $("kB").textContent = sim.B; $("kBs").textContent = `${sim.direct} diretas · ${sim.adjust} ajuste`;
+    $("kC").textContent = C; $("kCv").textContent = vis.bancada;
+    $("kpiC").classList.toggle("mismatch", C !== vis.bancada && t > 47);
+    $("kE").textContent = sim.E;
+    $("kD").textContent = sim.pal; $("kDbar").style.width = `${sim.pal / 40 * 100}%`; $("kPal").textContent = `PALLET-${String(sim.palName).padStart(5,"0")}`;
+
+    // alerta
+    if (sim.alert) {
+      const text = sim.alert.dyn
+        ? `Contado ${C} × visível ${vis.bancada} há 3 s. Snapshot ${clock(46)} salvo. Entregues ${sim.B} × vales ${sim.E}: uma cesta saiu sem a câmera ver.`
+        : sim.alert.text;
+      alertEl.className = `alert show ${sim.alert.level}`; alertBody.innerHTML = `<b>${sim.alert.title}</b>${text}`;
+    }
+    else alertEl.className = "alert";
+
+    // log
+    logEl.replaceChildren(...sim.events.slice(0, 9).map(e => {
+      const d = document.createElement("div"); d.className = "e";
+      const tm = `<span class="t">${clock(e.t)}</span>`;
+      if (e.kind === "cam") d.innerHTML = `${tm}<span class="${e.anulado ? "an" : ""}"><span class="id">#${e.id}</span> ${e.stack === 2 ? "pilha2" : "cesta"} ${e.dir}</span>${e.anulado ? '<span class="tag">vai-e-volta</span>' : ""}${e.direta && !e.anulado ? '<span class="tag2">direta</span>' : ""}${e.stack === 2 && !e.anulado ? '<span class="tag2">×2</span>' : ""}`;
+      else if (e.kind === "vale") d.innerHTML = `${tm}<span class="tag3">${e.text}</span>`;
+      else if (e.kind === "pal") d.innerHTML = `${tm}<span class="tag3">${e.text}</span>`;
+      else d.innerHTML = `${tm}<span class="tag">${e.text}</span>`;
+      return d;
+    }));
+
+    // fechamento
+    const closing = $("closing");
+    if (ci === CHAPTERS.length - 1) {
+      closing.hidden = false;
+      const D = sim.palDone.length * 40 + sim.pal - 32;
+      const rows = [
+        ["A · Processadas (câmera)", sim.A, sim.A === D],
+        ["D · Palete × 40 (operação)", D, sim.A === D],
+        ["B · Entregues (câmera + ajuste)", sim.B, sim.B === sim.E],
+        ["E · Vales recolhidos (operação)", sim.E, sim.B === sim.E],
+        ["C · Saldo na bancada (A − B + inicial)", C, C === vis.bancada],
+        ["Visível na bancada agora", vis.bancada, C === vis.bancada],
+      ];
+      $("ledger").innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td class="num">${r[1]}</td><td class="ok">${r[2] ? "✔" : "✕"}</td></tr>`).join("");
+    } else closing.hidden = true;
+  }
+
+  // ---------- controles ----------
+  CHAPTERS.forEach((c, i) => { const b = document.createElement("button"); b.textContent = `${i + 1} · ${c.title}`; b.dataset.i = i; b.id = `chap${i}`; b.addEventListener("click", () => { seek(c.t); render(); }); $("chapters").appendChild(b); });
+  $("btnPlay").addEventListener("click", () => { playing = !playing; $("btnPlay").textContent = playing ? "Pausar" : "Reproduzir"; last = null; if (playing) requestAnimationFrame(frame); });
+  $("btnSpeed").addEventListener("click", () => { const i = (speedOpts.indexOf(speed) + 1) % speedOpts.length; speed = speedOpts[i]; $("btnSpeed").textContent = `${speed}×`; });
+
+  let acc = 0;
+  function frame(now) {
+    if (!playing) return;
+    if (last != null) { acc += Math.min((now - last) / 1000, 0.25) * speed; while (acc >= DT) { step(); acc -= DT; } }
+    last = now; render(); requestAnimationFrame(frame);
+  }
+
+  function start(saved) {
+    reset();
+    if (saved && typeof saved.t === "number") { seek(saved.t); playing = saved.playing !== false; }
+    else if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { seek(10); playing = false; }
+    $("btnPlay").textContent = playing ? "Pausar" : "Reproduzir";
+    render();
+    if (playing) requestAnimationFrame(frame);
+  }
+  window.claude?.hot?.snapshot?.(() => ({ t, playing }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>

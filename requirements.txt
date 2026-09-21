@@ -1,0 +1,7 @@
+# Fase 0 — teste zero
+# Instalar: pip install -r requirements.txt
+ultralytics>=8.3        # YOLO (detecção) — traz torch/torchvision como dependência
+supervision[assets]>=0.28   # linha virtual, anotação, vídeos de exemplo
+trackers>=2.0           # ByteTrack (tracking) — substitui o sv.ByteTrack, deprecado
+opencv-python>=4.10
+numpy

@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.pyc
+
+# dados pesados / sensíveis — nunca versionar
+# (data/zonas/ é configuração pequena e DEVE ser versionada)
+data/videos/
+data/db/
+data/snapshots/
+data/saida/
+data/dataset/
+runs/
+
+# pesos baixados pelo ultralytics
+*.pt
+
+# fotos originais da operação (podem mostrar pessoas) — versionar só as versões borradas
+Mesas.jpeg

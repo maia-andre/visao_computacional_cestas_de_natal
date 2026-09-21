@@ -1,0 +1,8 @@
+{
+  "fonte": "data/videos/people-walking.mp4",
+  "comentario": "Exemplo para o teste zero em modo zonas: duas faixas verticais; o resto é 'fora'.",
+  "zonas": [
+    {"nome": "esquerda", "pontos": [[0.0, 0.0], [0.4, 0.0], [0.4, 1.0], [0.0, 1.0]]},
+    {"nome": "centro",   "pontos": [[0.4, 0.0], [0.7, 0.0], [0.7, 1.0], [0.4, 1.0]]}
+  ]
+}
