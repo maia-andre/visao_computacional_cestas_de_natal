@@ -39,10 +39,19 @@ Decisões embutidas no script, e o porquê:
 |---|---|---|
 | `--conf` | 0,05 | Confiança baixa de propósito: apagar uma caixa errada é mais rápido que desenhar uma que faltou. |
 | `--ignorar-acima` | 0,30 | Descarta caixas com centro no terço superior do quadro — nesses vídeos é o fundo do galpão (paletes de papel, caixas de estoque), que não interessa. |
+| `--largura-max` | 50 (% do quadro) | Descarta o balcão de OSB, que é ele próprio uma "box" para o YOLO-World. Ver abaixo. |
 
 Resultado em 2026-09-22: 213 tarefas, **1.300 caixas, média 6,1/frame**, só 2 frames sem nenhuma caixa.
 
-**Falso positivo conhecido:** o balcão de OSB é ele próprio uma "box" para o YOLO-World. ~17% das caixas (227 de 1.300, em 176 frames) são retângulos enormes cobrindo 13–19% da imagem, com confiança baixa (0,07–0,15). São fáceis de reconhecer e apagar — ver o guia de anotação abaixo.
+**Falso positivo principal — o balcão.** O balcão de OSB é ele próprio uma "box" para o YOLO-World. Na primeira rodada foram 227 caixas enormes (13–19% da imagem) em 176 dos 213 frames.
+
+O que **não** separa esses falsos positivos: a **confiança**. Chega a 0,43, e 21 delas passavam de 0,30 — sobrepondo a faixa das cestas boas (0,32–0,61). Filtrar por confiança apagaria cesta de verdade.
+
+O que separa: a **largura**. O balcão atravessa o quadro (46,5–65,8% da largura); uma cesta nunca passa de ~49%, nem carregada perto da câmera. Daí o `--largura-max 50`, que remove 224 das 230 caixas de balcão sem tocar em nenhuma cesta.
+
+O corte foi posto em 50 e não em 45 de propósito: a 45% ele pegaria 6 balcões a mais, mas apagaria junto uma caixa frouxa que envolvia uma cesta real. Caixa apagada é cesta que o anotador pode não notar; caixa sobrando é um `Backspace`. Sobram ~6 balcões para apagar à mão em 213 frames.
+
+**Falso positivo menor:** um pedaço de papelão achatado no chão é detectado como cesta (confiança ~0,05, aparece em boa parte dos frames). Apagar na anotação.
 
 ### 3. Anotar no Label Studio
 
@@ -60,9 +69,8 @@ Classes configuradas no projeto `cesta_v1`:
 |---|---|---|
 | `cesta` | cada cesta individual visível — no palete (sem filme), na bancada, na mão do funcionário — mesmo parcialmente coberta | cestas dentro de palete filmado (não são distinguíveis) |
 | `palete` | o bloco inteiro (palete + carga) dentro da tenda | palete vazio (por enquanto) |
-| `balcao` | a bancada de entrega | — |
 
-> **Decisão em aberto:** `balcao` entrou no config mas não está no plano original. Como as zonas de contagem são polígonos desenhados à mão uma vez (câmera fixa a partir da Fase 3), detectar o balcão não é necessário para contar. Só vale a pena se a ideia for reposicionar zonas automaticamente. Se não for, tirar a classe e apagar essas caixas. A classe `pilha2` do plano original **não** foi criada — ver a nota no passo 2.
+> **Decidido em 2026-09-22:** a classe `balcao` foi **removida**. As zonas de contagem são polígonos desenhados à mão uma vez (câmera fixa a partir da Fase 3), então detectar o balcão não ajuda a contar nada. A classe `pilha2` do plano original **não** foi criada — o YOLO-World já separa a pilha de 2, ver a nota no passo 2.
 
 Regras de anotação (consistência importa mais que perfeição):
 
@@ -77,7 +85,7 @@ O Label Studio permite girar um retângulo, mas a exportação YOLO padrão **de
 
 Caixas giradas só funcionam exportando em **YOLO-OBB**, o que exige treinar um modelo da família `yolov8n-obb.pt` e mudar o `src/cestas/pipeline.py`. Não é o caminho desta fase. Para uma cesta inclinada, desenhe o retângulo alinhado aos eixos que a envolve.
 
-Para remover a tentação, dá para desabilitar a alça de rotação no config do projeto (Settings → Labeling Interface):
+A alça de rotação já foi **desabilitada** no projeto `cesta_v1` para o erro não ser possível (Settings → Labeling Interface):
 
 ```xml
 <RectangleLabels name="label" toName="image" canRotate="false">
@@ -150,13 +158,13 @@ Na tenda, uma cesta leva segundos para mudar de zona; 10 fps é sobra.
 - [ ] ≥ 300 frames anotados (corrigidos por humano), dataset exportado em formato YOLO em `data/dataset/`.
 - [ ] `best.pt` com mAP50 ≥ 0,85 na validação.
 - [ ] Matriz de confusão analisada; principais erros documentados aqui embaixo.
-- [ ] Decidido se `balcao` fica ou sai; confirmado se `pilha2` é dispensável.
+- [x] Decidido: `balcao` saiu. Falta confirmar se `pilha2` é dispensável ao longo da anotação.
 - [ ] `contar.py` rodando com `--modelo best.pt --classes cesta --zonas ...` num vídeo do almoxarifado.
 
 ## Registro de erros observados
 
 | condição | sintoma | ação |
 |---|---|---|
-| Pré-anotação YOLO-World, prompt `"box"` | O balcão de OSB é detectado como uma caixa gigante (13–19% da imagem), em 176 dos 213 frames | Apagar na anotação; confiança sempre < 0,16, fácil de reconhecer visualmente |
+| Pré-anotação YOLO-World, prompt `"box"` | O balcão de OSB é detectado como uma caixa gigante (13–19% da imagem), em 176 dos 213 frames | Resolvido por `--largura-max 50`. **Não** filtrar por confiança: a do balcão chega a 0,43 e invade a faixa das cestas |
 | Pré-anotação YOLO-World, prompt `"box"` | Papelão achatado no chão detectado como cesta | Apagar na anotação |
 | YOLOv8n base (COCO) | Não detecta cesta nenhuma; só `suitcase` esporádico | Motivo desta fase existir |

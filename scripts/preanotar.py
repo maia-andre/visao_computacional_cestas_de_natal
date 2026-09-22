@@ -8,6 +8,9 @@ Usa o YOLO-World (detector que aceita texto em vez de classes fixas) com o promp
 correspondente no Label Studio. O anotador só corrige (apaga falsos, divide pilhas,
 ajusta). Caixas cujo centro está acima de `--ignorar-acima` (fração da altura) são
 descartadas: nesses vídeos o fundo do galpão fica no terço superior do quadro.
+Caixas mais largas que `--largura-max` (% do quadro) também: o balcão de OSB é ele
+próprio uma "box" para o YOLO-World e aparecia em 173 dos 213 frames. Uma cesta
+nunca passa de ~49% da largura, nem mesmo carregada perto da câmera.
 Confiança baixa de propósito (0,05): apagar uma caixa errada é mais rápido que desenhar uma que faltou.
 
 `--previa N` só desenha N frames em data/dataset/preanot_previa/ e não envia nada.
@@ -34,7 +37,8 @@ PROMPT = "box"
 VERSAO = "yolo-world-box-v1"
 
 
-def detectar(modelo: YOLO, caminho: Path, conf: float, ignorar_acima: float) -> list[tuple[float, float, float, float, float]]:
+def detectar(modelo: YOLO, caminho: Path, conf: float, ignorar_acima: float,
+             largura_max: float) -> list[tuple[float, float, float, float, float]]:
     """Retorna caixas (x, y, w, h em % da imagem, conf) já filtradas."""
     r = modelo.predict(str(caminho), conf=conf, imgsz=1920, agnostic_nms=True, verbose=False)[0]
     h, w = r.orig_shape
@@ -42,6 +46,8 @@ def detectar(modelo: YOLO, caminho: Path, conf: float, ignorar_acima: float) -> 
     for b in r.boxes:
         x1, y1, x2, y2 = (float(v) for v in b.xyxy[0])
         if (y1 + y2) / 2 < ignorar_acima * h:
+            continue
+        if 100 * (x2 - x1) / w > largura_max:
             continue
         saida.append((100 * x1 / w, 100 * y1 / h, 100 * (x2 - x1) / w, 100 * (y2 - y1) / h, float(b.conf)))
     return saida
@@ -119,6 +125,7 @@ def main() -> None:
     ap.add_argument("--projeto", type=int, default=1)
     ap.add_argument("--conf", type=float, default=0.05)
     ap.add_argument("--ignorar-acima", type=float, default=0.30)
+    ap.add_argument("--largura-max", type=float, default=50.0, help="descarta caixas mais largas que isso (%% do quadro)")
     ap.add_argument("--previa", type=int, default=0, help="só desenha N frames, não envia")
     args = ap.parse_args()
 
@@ -134,7 +141,7 @@ def main() -> None:
         for f in frames[::passo][: args.previa]:
             img = cv2.imread(str(f))
             h, w = img.shape[:2]
-            caixas = detectar(modelo, f, args.conf, args.ignorar_acima)
+            caixas = detectar(modelo, f, args.conf, args.ignorar_acima, args.largura_max)
             for x, y, bw, bh, c in caixas:
                 p1 = (int(x * w / 100), int(y * h / 100))
                 p2 = (int((x + bw) * w / 100), int((y + bh) * h / 100))
@@ -162,7 +169,7 @@ def main() -> None:
             pulados += 1
             continue
         h, w = cv2.imread(str(f)).shape[:2]
-        caixas = detectar(modelo, f, args.conf, args.ignorar_acima)
+        caixas = detectar(modelo, f, args.conf, args.ignorar_acima, args.largura_max)
         ls.enviar(tarefa, from_name, to_name, w, h, caixas)
         enviados += 1
         total += len(caixas)
