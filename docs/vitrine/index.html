@@ -165,13 +165,19 @@
   .ph p { font-size: 14px; color: var(--ink-2); }
 
   /* ---------- objeto 3D ---------- */
-  .objeto { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .objeto { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; position: relative; }
   .objeto model-viewer { display: block; width: 100%; height: clamp(320px, 52vh, 520px); background: transparent; --poster-color: transparent; }
+  .mv-erro { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: 8px; text-align: center; padding: 24px; color: var(--ink-2); font-size: 14px; }
+  .mv-erro[hidden] { display: none; }
+  .mv-erro .cmd { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); background: var(--bg-3); border: 1px solid var(--line); border-radius: 3px; padding: 6px 10px; }
   .objeto .leg { border-top: 1px solid var(--line); padding: 10px 16px; font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: space-between; }
 
   /* ---------- teste com filmagem real ---------- */
   .real { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: start; }
   @media (max-width: 860px) { .real { grid-template-columns: 1fr; } }
+  .clipe { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+  .clipe img { display: block; width: 100%; height: auto; background: #18140f; }
+  .clipe .leg { border-top: 1px solid var(--line); padding: 10px 16px; font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: space-between; }
   .chartbox { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 10px; }
   .chartbox .cap { font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: space-between; margin-bottom: 10px; }
   .chartbox .cap b { color: var(--ink-2); font-weight: 600; }
@@ -271,6 +277,11 @@
         exposure="1.05"
         loading="lazy"
         touch-action="pan-y"></model-viewer>
+      <div class="mv-erro" id="mvErro" hidden>
+        <p>O modelo 3D não carrega quando a página é aberta direto do disco: o navegador bloqueia a leitura do arquivo.</p>
+        <p class="cmd">python -m http.server --directory docs/vitrine</p>
+        <p>e abra <b>http://localhost:8000</b></p>
+      </div>
       <div class="leg"><span>Arraste para girar · role para aproximar</span><span>modelo 3D</span></div>
     </div>
   </section>
@@ -323,6 +334,11 @@
     <div class="eyebrow">Teste real · 22/09</div>
     <h2>A primeira vez que o código olhou a operação</h2>
     <p class="lead">Tudo acima desta linha é simulação. Isto aqui não é: 63 segundos gravados no almoxarifado em 21/09, com contagem manual feita à parte para servir de gabarito. O modelo treinado ainda não existe — quem detectou foi um YOLO-World genérico, guiado só pela palavra <code>box</code>.</p>
+    <div class="clipe">
+      <img src="clipe-almoxarifado.webp" loading="lazy" width="640" height="546"
+           alt="Doze segundos da filmagem do almoxarifado. Caixas verdes numeradas acompanham cada cesta sobre a bancada enquanto funcionarios se aproximam e levam uma de cada vez. Os rostos estao borrados.">
+      <div class="leg"><span>12 s da gravação de 21/09 · detecção e rastreio do próprio pipeline</span><span>rostos borrados</span></div>
+    </div>
     <div class="real">
       <div class="chartbox">
         <div class="cap"><span>Cestas na bancada, segundo a câmera</span><span><b>1 amostra a cada 0,5 s</b></span></div>
@@ -360,6 +376,21 @@
 </div>
 
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js"></script>
+
+<script>
+// O <model-viewer> busca o .glb por fetch, que o navegador bloqueia em file://.
+// Nesse caso nada carrega e o quadro fica vazio: melhor dizer o porquê.
+(function () {
+  "use strict";
+  var mv = document.querySelector(".objeto model-viewer"), aviso = document.getElementById("mvErro");
+  if (!mv || !aviso) return;
+  var pronto = false;
+  mv.addEventListener("load", function () { pronto = true; aviso.hidden = true; });
+  mv.addEventListener("error", function () { if (!pronto) aviso.hidden = false; });
+  // file:// costuma falhar em silêncio, sem disparar "error"
+  setTimeout(function () { if (!pronto) aviso.hidden = false; }, 8000);
+})();
+</script>
 
 <script>
 (function () {
@@ -603,7 +634,7 @@
 
   // ---------- controles ----------
   CHAPTERS.forEach((c, i) => { const b = document.createElement("button"); b.textContent = `${i + 1} · ${c.title}`; b.dataset.i = i; b.id = `chap${i}`; b.addEventListener("click", () => { seek(c.t); render(); }); $("chapters").appendChild(b); });
-  $("btnPlay").addEventListener("click", () => { playing = !playing; $("btnPlay").textContent = playing ? "Pausar" : "Reproduzir"; last = null; if (playing) requestAnimationFrame(frame); });
+  $("btnPlay").addEventListener("click", () => { playing = !playing; autoPausa = false; $("btnPlay").textContent = playing ? "Pausar" : "Reproduzir"; last = null; if (playing) requestAnimationFrame(frame); });
   $("btnSpeed").addEventListener("click", () => { const i = (speedOpts.indexOf(speed) + 1) % speedOpts.length; speed = speedOpts[i]; $("btnSpeed").textContent = `${speed}×`; });
 
   let acc = 0;
@@ -621,6 +652,20 @@
     render();
     if (playing) requestAnimationFrame(frame);
   }
+  // O palco tem 66 s de ciclo e o capítulo final começa aos 58 s. Se ele continuar
+  // rodando enquanto o leitor está lá embaixo, ao voltar encontra o modal de
+  // fechamento em vez do começo da história. Só anima o que está à vista.
+  let vistaOk = true, autoPausa = false;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (es) {
+      vistaOk = es[0].isIntersecting;
+      if (!vistaOk && playing) { playing = false; autoPausa = true; }
+      else if (vistaOk && autoPausa) {
+        autoPausa = false; playing = true; last = null; requestAnimationFrame(frame);
+      }
+    }, { threshold: 0.25 }).observe($("stage"));
+  }
+
   window.claude?.hot?.snapshot?.(() => ({ t, playing }));
   window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
 })();
