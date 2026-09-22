@@ -4,7 +4,8 @@ __pycache__/
 
 # dados pesados / sensíveis — nunca versionar
 # (data/zonas/ é configuração pequena e DEVE ser versionada)
-data/videos/
+data/videos/*
+!data/videos/verdade.csv
 data/db/
 data/snapshots/
 data/saida/
@@ -16,3 +17,4 @@ runs/
 
 # fotos originais da operação (podem mostrar pessoas) — versionar só as versões borradas
 Mesas.jpeg
+data/Cesta fotos/
