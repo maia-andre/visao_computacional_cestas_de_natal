@@ -1,0 +1,15 @@
+{
+  "fonte": "data/videos/2026-09-21_almox_obliqua_01.mp4",
+  "comentario": "TESTE (2026-09-22). Zona unica sobre a bancada, para o primeiro teste ponta-a-ponta com filmagem real, antes do modelo treinado. NAO e a configuracao da Fase 3: aqui a camera esta na mao; as zonas definitivas serao desenhadas com a camera fixa da tenda por scripts/definir_zonas.py. A faixa foi ajustada por minimos quadrados sobre os 453 centros de cesta pre-anotados DESTE video com confianca >= 0,25: y = -0,0925x + 0,4315. Ajustar com os dois videos juntos da uma reta errada (y = -0,0617x + 0,4175), porque o enquadramento do video 02 e diferente. Meia-largura 0,07: +-0,06 ja cobre 99% dos centros e a folga extra absorve a deriva da camera na mao, medida em ate 0,10 do quadro em x e 0,027 em y. Evento que interessa: bancada -> fora, uma cesta saindo da bancada.",
+  "zonas": [
+    {
+      "nome": "bancada",
+      "pontos": [
+        [0.02, 0.360],
+        [0.95, 0.274],
+        [0.95, 0.414],
+        [0.02, 0.500]
+      ]
+    }
+  ]
+}

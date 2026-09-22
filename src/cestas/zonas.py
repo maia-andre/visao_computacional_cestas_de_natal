@@ -103,6 +103,7 @@ class MonitorZonas:
 
     zonas: dict[str, sv.PolygonZone] = field(init=False)
     _estado: dict[int, _EstadoTrack] = field(init=False, default_factory=dict)
+    _ocupacao: dict[str, int] = field(init=False, default_factory=dict)
 
     def __post_init__(self) -> None:
         self.zonas = {
@@ -122,12 +123,14 @@ class MonitorZonas:
         n = len(dets)
         resultado = [FORA] * n
         if n == 0:
+            self._ocupacao = {nome: 0 for nome in self.zonas}
             return resultado
         for nome, zona in self.zonas.items():
-            dentro = zona.trigger(dets)  # também atualiza zona.current_count
+            dentro = zona.trigger(dets)
             for i in np.flatnonzero(dentro):
                 if resultado[i] == FORA:
                     resultado[i] = nome
+        self._ocupacao = {nome: resultado.count(nome) for nome in self.zonas}
         return resultado
 
     def atualizar(self, dets: sv.Detections, frame_idx: int, fps: float) -> list[Transicao]:
@@ -166,8 +169,14 @@ class MonitorZonas:
         return transicoes
 
     def contagem_atual(self) -> dict[str, int]:
-        """Quantos objetos estão em cada zona neste instante (do último `atualizar`)."""
-        return {nome: int(z.current_count) for nome, z in self.zonas.items()}
+        """Quantos objetos estão em cada zona neste instante (do último `atualizar`).
+
+        Contado a partir da própria classificação do frame, e não de
+        `PolygonZone.current_count`: num frame sem nenhuma detecção o
+        `current_count` não é zerado e devolve o valor do frame anterior — o que
+        fazia a bancada continuar "com 1 cesta" depois de esvaziada.
+        """
+        return {nome: self._ocupacao.get(nome, 0) for nome in self.zonas}
 
     def anotadores(self) -> list[sv.PolygonZoneAnnotator]:
         return [

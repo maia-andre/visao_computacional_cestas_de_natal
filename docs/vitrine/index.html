@@ -164,6 +164,23 @@
   .ph h3 { font-size: 20px; font-weight: 600; }
   .ph p { font-size: 14px; color: var(--ink-2); }
 
+  /* ---------- teste com filmagem real ---------- */
+  .real { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .real { grid-template-columns: 1fr; } }
+  .chartbox { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 10px; }
+  .chartbox .cap { font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: space-between; margin-bottom: 10px; }
+  .chartbox .cap b { color: var(--ink-2); font-weight: 600; }
+  .chartbox svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .scoreboard { display: grid; gap: 10px; }
+  .sc { background: var(--bg-2); border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 4px; padding: 10px 12px; display: flex; align-items: baseline; gap: 10px; }
+  .sc.ok { border-left-color: var(--good); }
+  .sc.bad { border-left-color: var(--crit); }
+  .sc .v { font-family: var(--font-display); font-size: 30px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; min-width: 3.6ch; }
+  .sc.ok .v { color: var(--good); }
+  .sc.bad .v { color: var(--crit); }
+  .sc .t { font-size: 13.5px; color: var(--ink-2); }
+  .sc .t b { color: var(--ink); font-weight: 600; display: block; font-size: 14.5px; }
+
   .note { border: 1px dashed var(--line); border-radius: 4px; padding: 14px 16px; max-width: 72ch; color: var(--ink-2); font-size: 15px; }
   .note b { color: var(--ink); }
   footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13px; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
@@ -278,9 +295,29 @@
   </section>
 
   <section class="s">
+    <div class="eyebrow">Teste real · 22/09</div>
+    <h2>A primeira vez que o código olhou a operação</h2>
+    <p class="lead">Tudo acima desta linha é simulação. Isto aqui não é: 63 segundos gravados no almoxarifado em 21/09, com contagem manual feita à parte para servir de gabarito. O modelo treinado ainda não existe — quem detectou foi um YOLO-World genérico, guiado só pela palavra <code>box</code>.</p>
+    <div class="real">
+      <div class="chartbox">
+        <div class="cap"><span>Cestas na bancada, segundo a câmera</span><span><b>1 amostra a cada 0,5 s</b></span></div>
+        <svg viewBox="0 0 620 200" role="img" aria-label="Cestas na bancada ao longo de 62 segundos: começa em 7, cai até 0 aos 32 segundos, sobe de novo até 4 aos 47 segundos e termina em 0.">
+          <g id="realChart"></g>
+        </svg>
+      </div>
+      <div class="scoreboard">
+        <div class="sc ok"><span class="v">7</span><span class="t"><b>Pico na bancada</b>A contagem manual diz 7. A câmera também.</span></div>
+        <div class="sc ok"><span class="v">0</span><span class="t"><b>No fim do vídeo</b>Bancada vazia no gabarito, vazia na câmera.</span></div>
+        <div class="sc bad"><span class="v">0/10</span><span class="t"><b>Entregas contadas</b>Nenhuma. É a parte que não funcionou — explicada abaixo.</span></div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:16px"><b>Por que as entregas deram zero.</b> Contar entrega exige seguir a <em>mesma</em> cesta saindo da bancada. Os 16 objetos rastreados nasceram e morreram dentro da zona: quando o funcionário pega a cesta e a encosta no corpo, o detector genérico a perde antes que ela cruze a borda. A saída fica invisível para a regra. <b>A curva não depende disso</b> — ela só pergunta quantas cestas há na bancada agora, quadro a quadro, sem precisar de identidade. Por isso um número bate e o outro não. As duas correções conhecidas são a Fase 2 (modelo treinado em cesta, que não perde o objeto na mão) e a Fase 3 (câmera fixa; aqui o celular estava na mão e derivou 10% do quadro).</p>
+  </section>
+
+  <section class="s">
     <div class="eyebrow">Transparência</div>
     <h2>O que é real nesta vitrine</h2>
-    <p class="note"><b>As cestas são desenhadas</b> — a detecção por IA entra na Fase 2, depois de gravar a operação. <b>As regras são as do código real</b>: zonas, confirmação de transição, anulação de vai-e-volta, entrega direta e a conferência contado × visível já rodam no protótipo (Fase 0). A foto é da mesa usada em 2025, que na tenda vira um L; a pessoa ao fundo foi desfocada. Os números começam de um turno em andamento para caber em um minuto.</p>
+    <p class="note"><b>Na animação acima, as cestas são desenhadas</b> — a detecção por IA entra na Fase 2. A seção anterior, essa sim, é medição: vídeo real, detecção real, gabarito conferido à mão, inclusive o número que não fechou. <b>As regras são as do código real</b>: zonas, confirmação de transição, anulação de vai-e-volta, entrega direta e a conferência contado × visível já rodam no protótipo (Fase 0). A foto é da mesa usada em 2025, que na tenda vira um L; a pessoa ao fundo foi desfocada. Os números começam de um turno em andamento para caber em um minuto.</p>
   </section>
 
   <footer>
@@ -551,5 +588,60 @@
   }
   window.claude?.hot?.snapshot?.(() => ({ t, playing }));
   window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
+
+<script>
+// Curva do teste de 22/09: cestas na bancada a cada 0,5 s, 62 s de vídeo real.
+// Medida por scripts/testar_zonas_preanot.py sobre as detecções do YOLO-World
+// (conf >= 0,35) e a zona data/zonas/almox_obliqua_teste.json.
+(function () {
+  "use strict";
+  var V = [6,7,7,7,6,6,4,4,6,6,7,7,5,4,6,4,5,6,6,5,6,4,3,7,6,5,4,5,5,3,3,3,5,4,4,4,5,5,5,3,3,2,3,3,3,3,4,3,3,2,3,3,2,2,1,2,3,3,2,3,2,1,1,1,0,0,1,1,0,1,1,1,2,2,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,3,2,3,3,3,3,3,1,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0];
+  var g = document.getElementById("realChart");
+  if (!g) return;
+  var W = 620, H = 200, PAD_L = 26, PAD_B = 22, PAD_T = 8;
+  var maxY = 8, n = V.length;
+  var x = function (i) { return PAD_L + i * (W - PAD_L) / (n - 1); };
+  var y = function (v) { return PAD_T + (maxY - v) * (H - PAD_T - PAD_B) / maxY; };
+  var ns = "http://www.w3.org/2000/svg";
+  function el(tag, attrs) {
+    var e = document.createElementNS(ns, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  // grade horizontal + rótulos do eixo
+  [0, 2, 4, 6, 8].forEach(function (v) {
+    g.appendChild(el("line", { x1: PAD_L, y1: y(v), x2: W, y2: y(v),
+      stroke: "var(--line)", "stroke-width": 1, "shape-rendering": "crispEdges" }));
+    var t = el("text", { x: PAD_L - 7, y: y(v) + 4, "text-anchor": "end",
+      fill: "var(--ink-3)", "font-size": 11, "font-family": "var(--font-mono)" });
+    t.textContent = v;
+    g.appendChild(t);
+  });
+  // área + linha da série
+  var d = V.map(function (v, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); }).join(" ");
+  g.appendChild(el("path", { d: d + " L" + x(n - 1).toFixed(1) + " " + y(0) + " L" + x(0).toFixed(1) + " " + y(0) + " Z",
+    fill: "var(--z-bancada)", opacity: 0.14 }));
+  g.appendChild(el("path", { d: d, fill: "none", stroke: "var(--z-bancada)", "stroke-width": 2,
+    "stroke-linejoin": "round", "stroke-linecap": "round" }));
+  // marcos conferidos contra a contagem manual
+  [{ i: 1, v: 7, txt: "pico 7 · gabarito 7" },
+   { i: 99, v: 4, txt: "reposição do chão" },
+   { i: n - 1, v: 0, txt: "vazia · gabarito 0" }].forEach(function (m) {
+    g.appendChild(el("circle", { cx: x(m.i), cy: y(m.v), r: 3.5, fill: "var(--z-bancada)" }));
+    var anchor = m.i > n * 0.6 ? "end" : (m.i < n * 0.15 ? "start" : "middle");
+    var t = el("text", { x: x(m.i), y: y(m.v) - 9, "text-anchor": anchor,
+      fill: "var(--ink-2)", "font-size": 11.5 });
+    t.textContent = m.txt;
+    g.appendChild(t);
+  });
+  // eixo do tempo
+  [[0, "0 s"], [n - 1, "62 s"]].forEach(function (p) {
+    var t = el("text", { x: x(p[0]), y: H - 4, "text-anchor": p[0] ? "end" : "start",
+      fill: "var(--ink-3)", "font-size": 11, "font-family": "var(--font-mono)" });
+    t.textContent = p[1];
+    g.appendChild(t);
+  });
 })();
 </script>

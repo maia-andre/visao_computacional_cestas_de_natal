@@ -57,6 +57,11 @@ class LinhaVirtual:
 class ConfigContador:
     modelo: str = "yolov8n.pt"
     classes: list[str] = field(default_factory=list)  # vazio = todas
+    prompt: list[str] = field(default_factory=list)   # YOLO-World: classes por texto (ex.: ["box"])
+    imgsz: int = 640                                  # lado maior na inferência; suba para objeto pequeno
+    largura_max: float = 100.0                        # descarta detecção mais larga que isso (% do quadro)
+    track_conf: float | None = None                   # confiança que INICIA um track (None = max(confianca, 0.5))
+    track_buffer_s: float = 1.0                       # por quantos segundos um track sobrevive sem detecção
     confianca: float = 0.35
     # modo linha (padrão) ...
     linha: LinhaVirtual = field(default_factory=lambda: LinhaVirtual(0.0, 0.5, 1.0, 0.5))
@@ -81,6 +86,10 @@ class Contador:
     def __init__(self, cfg: ConfigContador):
         self.cfg = cfg
         self.model = YOLO(cfg.modelo)
+        # YOLO-World aceita as classes como texto. Tem de vir antes de ler `names`,
+        # que passa a ser o próprio prompt.
+        if cfg.prompt:
+            self.model.set_classes(cfg.prompt)
         self.nome_por_id: dict[int, str] = self.model.names
         self.ids_classes: list[int] | None = None
         if cfg.classes:
@@ -107,10 +116,16 @@ class Contador:
         self.fps = fps if fps > 0 else 30.0
         fps_efetivo = self.fps / max(self.cfg.pular, 1)
         # track_activation_threshold baixo: a confiança mínima já foi aplicada no YOLO.
+        # `high_conf_det_threshold` é o que decide se uma detecção pode INICIAR um
+        # track (as mais fracas só ajudam a manter os que já existem). O padrão de 0,5
+        # é alto demais para detector zero-shot, cuja confiança em cesta fica em
+        # 0,26-0,64: quase nenhum track nasce e nenhuma transição acontece.
         self.tracker = ByteTrackTracker(
             frame_rate=fps_efetivo,
             track_activation_threshold=self.cfg.confianca,
-            high_conf_det_threshold=max(self.cfg.confianca, 0.5),
+            high_conf_det_threshold=(self.cfg.track_conf if self.cfg.track_conf is not None
+                                     else max(self.cfg.confianca, 0.5)),
+            lost_track_buffer=max(1, int(fps_efetivo * self.cfg.track_buffer_s)),
         )
         if self.cfg.modo == "zonas":
             self.monitor = MonitorZonas(
@@ -126,8 +141,15 @@ class Contador:
             self.linha = sv.LineZone(start=inicio, end=fim, triggering_anchors=[sv.Position.CENTER])
 
     def _detectar(self, frame: np.ndarray) -> sv.Detections:
-        result = self.model(frame, conf=self.cfg.confianca, classes=self.ids_classes, verbose=False)[0]
-        return sv.Detections.from_ultralytics(result)
+        result = self.model(frame, conf=self.cfg.confianca, classes=self.ids_classes,
+                            imgsz=self.cfg.imgsz, verbose=False)[0]
+        dets = sv.Detections.from_ultralytics(result)
+        if self.cfg.largura_max < 100.0 and len(dets):
+            # Mesmo falso positivo da pré-anotação: móveis/estruturas do fundo que
+            # atravessam o quadro. Ver docs/03_fase2_modelo.md.
+            larguras = (dets.xyxy[:, 2] - dets.xyxy[:, 0]) * 100.0 / frame.shape[1]
+            dets = dets[larguras <= self.cfg.largura_max]
+        return dets
 
     def _salvar_snapshot(self, frame_idx: int, track_id: int, rotulo: str, frame: np.ndarray) -> str | None:
         if self.cfg.snapshots_dir is None:
@@ -192,7 +214,8 @@ class Contador:
 
     def _cabecalho(self, fonte, largura, altura, fps, total) -> None:
         print(f"fonte={fonte!r} {largura}x{altura} @ {fps:.1f} fps" + (f" ({total} frames)" if total > 0 else ""))
-        print(f"modelo={self.cfg.modelo} classes={self.cfg.classes or 'todas'} conf>={self.cfg.confianca}")
+        print(f"modelo={self.cfg.modelo} classes={self.cfg.classes or 'todas'} conf>={self.cfg.confianca}"
+              f" imgsz={self.cfg.imgsz}" + (f" prompt={self.cfg.prompt}" if self.cfg.prompt else ""))
         if self.cfg.modo == "zonas":
             print(f"modo=zonas {self.monitor.nomes} + 'fora'  confirmacao={self.cfg.frames_confirmacao} frames"
                   f"  vai-e-volta<={self.cfg.vai_e_volta_s}s")

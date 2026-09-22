@@ -41,6 +41,16 @@ def main() -> None:
     p.add_argument("--fonte", required=True, help="caminho do vídeo, índice da webcam (0) ou URL rtsp://")
     p.add_argument("--modelo", default="yolov8n.pt", help="pesos YOLO (.pt). Padrão: yolov8n.pt (COCO)")
     p.add_argument("--classes", nargs="*", default=[], help="nomes de classe a contar (vazio = todas)")
+    p.add_argument("--prompt", nargs="*", default=[],
+                   help="YOLO-World: define as classes por texto (ex.: --prompt box). Exige pesos *-world*.pt")
+    p.add_argument("--imgsz", type=int, default=640,
+                   help="lado maior na inferência. Suba (1280/1920) quando o objeto é pequeno no quadro")
+    p.add_argument("--largura-max", type=float, default=100.0,
+                   help="descarta detecção mais larga que isso (%% do quadro). Útil contra móveis/estruturas")
+    p.add_argument("--track-conf", type=float, default=None,
+                   help="confiança que INICIA um track. Padrão max(--conf, 0.5); baixe para detector zero-shot")
+    p.add_argument("--track-buffer", type=float, default=1.0,
+                   help="segundos que um track sobrevive sem detecção (oclusão, borrão de movimento)")
     p.add_argument("--conf", type=float, default=0.35, help="confiança mínima da detecção")
 
     regra = p.add_argument_group("regra espacial (linha OU zonas)")
@@ -69,6 +79,11 @@ def main() -> None:
     cfg = ConfigContador(
         modelo=args.modelo,
         classes=args.classes,
+        prompt=args.prompt,
+        imgsz=args.imgsz,
+        largura_max=args.largura_max,
+        track_conf=args.track_conf,
+        track_buffer_s=args.track_buffer,
         confianca=args.conf,
         linha=LinhaVirtual.parse(args.linha),
         zonas=carregar_zonas(args.zonas) if args.zonas else None,
