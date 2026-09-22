@@ -164,6 +164,11 @@
   .ph h3 { font-size: 20px; font-weight: 600; }
   .ph p { font-size: 14px; color: var(--ink-2); }
 
+  /* ---------- objeto 3D ---------- */
+  .objeto { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .objeto model-viewer { display: block; width: 100%; height: clamp(320px, 52vh, 520px); background: transparent; --poster-color: transparent; }
+  .objeto .leg { border-top: 1px solid var(--line); padding: 10px 16px; font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: space-between; }
+
   /* ---------- teste com filmagem real ---------- */
   .real { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: start; }
   @media (max-width: 860px) { .real { grid-template-columns: 1fr; } }
@@ -251,6 +256,26 @@
   </div>
 
   <section class="s">
+    <div class="eyebrow">O objeto</div>
+    <h2>A cesta</h2>
+    <div class="objeto">
+      <model-viewer
+        src="cesta-de-natal.glb"
+        alt="Modelo tridimensional da caixa da cesta de Natal da Prefeitura de São José dos Campos, com padrão natalino azul e vermelho e alça vazada na tampa."
+        camera-controls
+        auto-rotate
+        auto-rotate-delay="600"
+        rotation-per-second="18deg"
+        interaction-prompt="none"
+        shadow-intensity="0.9"
+        exposure="1.05"
+        loading="lazy"
+        touch-action="pan-y"></model-viewer>
+      <div class="leg"><span>Arraste para girar · role para aproximar</span><span>modelo 3D</span></div>
+    </div>
+  </section>
+
+  <section class="s">
     <div class="eyebrow">Como funciona</div>
     <h2>Da imagem ao evento, em cinco passos</h2>
     <p class="lead">A câmera não "entende a operação". Ela responde uma pergunta simples, trinta vezes por segundo: <em>em que zona está cada cesta?</em> O resto é regra de negócio.</p>
@@ -333,6 +358,8 @@
     <span>Simulação · setembro de 2026</span>
   </footer>
 </div>
+
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js"></script>
 
 <script>
 (function () {

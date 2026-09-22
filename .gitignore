@@ -18,3 +18,7 @@ runs/
 # fotos originais da operação (podem mostrar pessoas) — versionar só as versões borradas
 Mesas.jpeg
 data/Cesta fotos/
+
+# objeto 3D solto na raiz (fonte de trabalho). A cópia que a vitrine carrega
+# fica em docs/vitrine/ e ESSA e versionada.
+/cesta-de-natal.glb
