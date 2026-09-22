@@ -75,6 +75,38 @@ Rodada completa, quando houver CPU e memória sobrando:
     --zonas data\zonas\almox_obliqua_teste.json --pular 5 --sem-janela
 ```
 
+## Anexo: rastrear pessoas em vez de cestas
+
+Ideia testada em 22/09: como o detector perde a cesta na mão, rastrear **a pessoa** que a leva embora. `person` é classe nativa do COCO, então o `yolov8n.pt` já detecta sem treino, e a pessoa nunca fica ocluída.
+
+Funciona muito bem **como tracking** e não funciona **como contagem**.
+
+### Como tracking
+
+13 tracks em 62 s, com o mais longo seguindo o operador por **52,7 s de identidade contínua** (316 amostras a 6 fps). A caixa mantém tamanho estável (largura mediana 0,161 do quadro) e só 3 das 315 amostras consecutivas saltam mais de 5% do quadro — é uma pessoa só, verificado, não uma troca de identidade.
+
+O contraste com a cesta é o ponto: mesmo tracker, mesmo vídeo, mesmos 62 s. Os 16 tracks de cesta nasceram e morreram dentro da zona; os de pessoa percorrem a cena inteira, de entrada a saída. **A diferença não está no algoritmo, está no que o detector consegue enxergar** — que é exatamente o argumento da Fase 2.
+
+### Como contagem, não serve
+
+Três regras testadas contra o gabarito de 10 entregas:
+
+| regra | resultado |
+|---|---|
+| linha diagonal em y = −0,0925x + 0,60, cruzamentos para baixo | 8 |
+| a mesma, em modo zonas, com anulação de vai-e-volta | 2 |
+| tracks de pessoa distintos | 13 |
+
+Nenhum é 10, e os três erram por motivos diferentes:
+
+- **A geometria está errada.** As entregas não descem pelo meio do quadro. As pessoas entram e saem pela **borda direita** (x entre 0,83 e 0,96); os centros de pessoa ficam em y 0,32–0,57 e quase ninguém alcança uma linha em y = 0,60.
+- **Uma pessoa faz várias viagens.** O gabarito registra 10 entregas para 3 pessoas. Contar pessoas que saem nunca daria 10.
+- **Sai gente que não entregou nada.** No modo linha, a pessoa `#2` cruza para fora e volta quatro vezes em poucos segundos: estava circulando perto da borda, não entregando. A anulação de vai-e-volta descarta essas três (por isso 8 cai para 2) — a regra do projeto funcionou, o problema é a premissa.
+
+Conclusão: a pessoa é um bom alvo para *demonstrar* o tracking e um mau proxy para *contar* entrega. Entrou na vitrine só como ilustração, com essa ressalva escrita ao lado. A contagem continua dependendo da Fase 2.
+
+Detecções gravadas uma vez e reaproveitadas para iterar a geometria de graça, como no caso das cestas; zona em `data/zonas/almox_saida_pessoas.json`.
+
 ## O que isto muda no plano
 
 Nada de prazo. Confirma a Fase 2 como caminho crítico: sem modelo treinado, a cesta na mão não é detectável de forma estável, e é justamente a cesta na mão que define a entrega. A curva de ocupação, porém, já funciona hoje — é o primeiro número real que o projeto produz.

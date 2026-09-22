@@ -311,6 +311,14 @@
         <div class="sc bad"><span class="v">0/10</span><span class="t"><b>Entregas contadas</b>Nenhuma. É a parte que não funcionou — explicada abaixo.</span></div>
       </div>
     </div>
+    <div class="chartbox" style="margin-top:16px">
+      <div class="cap"><span>As mesmas regras, num alvo que o detector não perde: <b>pessoas</b></span><span><b>9 trajetórias · 62 s</b></span></div>
+      <svg viewBox="0 0 620 340" role="img" aria-label="Trajetórias de nove pessoas rastreadas durante 62 segundos no almoxarifado. A linha diagonal marca a bancada. Uma trajetória longa acompanha o operador ao longo do balcão; as demais entram e saem pela borda direita do quadro.">
+        <g id="realTracks"></g>
+      </svg>
+      <p style="font-size:13px;color:var(--ink-2);margin-top:10px;max-width:70ch">Cada fio é uma pessoa seguida quadro a quadro. O fio destacado é o operador: <b>52,7 s de identidade contínua</b>, 316 amostras, e só 3 saltos acima de 5% do quadro. Os 16 objetos-cesta do mesmo vídeo não sobreviveram a uma única saída da zona. A diferença não é o algoritmo — é o que o detector consegue enxergar.</p>
+    </div>
+
     <p class="note" style="margin-top:16px"><b>Por que as entregas deram zero.</b> Contar entrega exige seguir a <em>mesma</em> cesta saindo da bancada. Os 16 objetos rastreados nasceram e morreram dentro da zona: quando o funcionário pega a cesta e a encosta no corpo, o detector genérico a perde antes que ela cruze a borda. A saída fica invisível para a regra. <b>A curva não depende disso</b> — ela só pergunta quantas cestas há na bancada agora, quadro a quadro, sem precisar de identidade. Por isso um número bate e o outro não. As duas correções conhecidas são a Fase 2 (modelo treinado em cesta, que não perde o objeto na mão) e a Fase 3 (câmera fixa; aqui o celular estava na mão e derivou 10% do quadro).</p>
   </section>
 
@@ -643,5 +651,40 @@
     t.textContent = p[1];
     g.appendChild(t);
   });
+})();
+</script>
+
+<script>
+// Trajetórias de pessoas do mesmo vídeo de 21/09 (yolov8n COCO + ByteTrack, 6 fps).
+// Só ilustram o tracking: NÃO são a contagem de entregas — ver o texto da seção.
+(function () {
+  "use strict";
+  var T = [{"id":0,"s":52.7,"d":"M303.7 43.8 L268.2 50.6 L308.9 48.0 L299.4 47.8 L240.4 60.5 L226.2 65.2 L278.7 56.5 L272.1 56.8 L159.3 73.1 L224.5 64.7 L173.7 59.2 L187.3 44.9 L154.0 49.2 L138.9 52.0 L156.4 62.2 L254.1 41.4 L238.4 41.2 L241.8 51.0"},{"id":2,"s":21.7,"d":"M444.5 111.6 L419.5 112.6 L452.5 115.9 L539.0 135.4 L565.7 169.6 L449.2 210.1 L290.4 142.2 L352.0 155.7 L535.2 189.3 L437.4 119.3 L371.6 102.9 L364.6 103.5 L366.4 101.7 L361.2 102.5 L394.5 111.4 L430.7 125.2 L513.5 168.7 L522.7 173.1"},{"id":4,"s":5.8,"d":"M578.0 111.4 L569.4 109.1 L557.6 104.2 L538.0 96.7 L512.0 95.6 L482.6 97.1 L449.0 101.4 L418.5 102.4 L398.3 95.8 L387.8 93.3 L391.5 92.9 L402.9 94.4 L420.2 99.0 L444.4 104.1 L478.7 112.0 L517.1 124.7 L545.5 138.4 L564.4 146.5 L564.4 146.5"},{"id":6,"s":5.2,"d":"M473.9 144.3 L465.1 144.0 L456.7 143.7 L448.3 143.3 L430.3 142.0 L416.2 140.8 L402.7 139.1 L387.4 137.0 L373.9 135.0 L362.9 133.4 L354.2 132.0 L345.3 131.2 L339.7 130.8 L336.8 130.9 L338.5 131.3 L342.4 131.8 L348.3 132.0 L357.3 132.0 L369.9 131.8 L382.4 131.4 L396.9 130.1 L412.0 128.6 L428.1 127.9 L443.2 127.9 L459.9 128.3 L479.4 128.7 L498.7 129.9 L515.4 133.9 L524.7 136.0 L534.4 137.8 L546.7 139.1 L546.7 139.1"},{"id":7,"s":8.3,"d":"M538.4 124.9 L507.2 115.2 L450.0 99.3 L411.1 88.1 L396.0 83.2 L394.8 82.1 L395.8 82.0 L397.0 81.7 L398.3 81.4 L398.8 80.1 L398.9 77.0 L399.8 77.3 L401.4 81.2 L405.3 80.2 L422.4 75.7 L455.8 74.1 L490.4 73.8 L499.2 77.3"},{"id":8,"s":7.5,"d":"M501.3 265.0 L465.3 248.4 L414.5 226.9 L349.7 200.8 L295.9 179.4 L251.8 162.1 L217.2 147.2 L195.8 139.4 L184.4 136.7 L181.9 138.9 L181.4 145.9 L191.4 154.0 L208.8 161.9 L232.8 167.5 L264.0 174.8 L295.4 183.3 L333.1 192.2 L371.2 200.6 L411.4 211.0 L461.4 222.2 L504.8 237.6 L539.7 253.2 L560.2 262.4 L560.2 262.4"},{"id":9,"s":8.5,"d":"M551.0 236.3 L518.9 216.8 L452.4 181.4 L382.6 150.6 L322.3 124.5 L278.7 114.5 L254.7 119.6 L245.1 117.9 L240.3 118.6 L238.9 122.9 L247.4 129.3 L257.8 133.2 L275.4 139.7 L311.1 151.3 L377.2 171.4 L460.8 198.8 L522.9 226.9 L547.2 235.5"},{"id":10,"s":9.7,"d":"M242.8 41.9 L243.9 48.2 L247.2 48.9 L252.4 42.4 L257.6 37.3 L259.3 37.3 L254.3 40.1 L247.2 45.1 L242.8 49.7 L240.4 51.9 L240.0 51.9 L240.4 51.9 L240.6 52.1 L240.9 52.2 L241.1 52.2 L241.3 52.2 L240.9 52.0 L241.2 51.5 L241.5 51.3 L241.9 51.3 L241.9 51.3"},{"id":11,"s":5.3,"d":"M549.1 154.9 L521.8 145.9 L486.1 137.8 L439.1 127.9 L403.8 120.1 L381.4 114.4 L366.4 110.1 L363.3 108.9 L369.1 109.0 L386.5 109.1 L410.2 107.5 L439.7 104.9 L470.9 104.5 L507.6 105.4 L539.8 111.5 L560.6 114.4 L567.2 115.6"}];
+  var g = document.getElementById("realTracks");
+  if (!g) return;
+  var ns = "http://www.w3.org/2000/svg";
+  function el(tag, a) { var e = document.createElementNS(ns, tag); for (var k in a) e.setAttribute(k, a[k]); return e; }
+  // bancada, na mesma reta ajustada aos dados (y = -0,0925x + 0,4315)
+  g.appendChild(el("line", { x1: 0, y1: 102.8, x2: 620, y2: 50.4,
+    stroke: "var(--z-bancada)", "stroke-width": 10, "stroke-linecap": "round", opacity: 0.22 }));
+  var rot = el("text", { x: 8, y: 120, fill: "var(--ink-3)", "font-size": 11.5,
+    "font-family": "var(--font-mono)" });
+  rot.textContent = "bancada";
+  g.appendChild(rot);
+  var maisLongo = T.reduce(function (a, b) { return b.s > a.s ? b : a; }, T[0]);
+  T.forEach(function (t) {
+    var chefe = t === maisLongo;
+    g.appendChild(el("path", { d: t.d, fill: "none",
+      stroke: chefe ? "var(--accent)" : "var(--z-fora)",
+      "stroke-width": chefe ? 2.4 : 1.4,
+      opacity: chefe ? 0.95 : 0.5,
+      "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    var fim = t.d.split("L").pop().trim().split(/\s+/);
+    g.appendChild(el("circle", { cx: fim[0], cy: fim[1], r: chefe ? 4 : 2.6,
+      fill: chefe ? "var(--accent)" : "var(--z-fora)", opacity: chefe ? 1 : 0.6 }));
+  });
+  var lab = el("text", { x: 300, y: 28, fill: "var(--accent)", "font-size": 12, "font-weight": 600 });
+  lab.textContent = "operador · " + maisLongo.s.toString().replace(".", ",") + " s sem perder a identidade";
+  g.appendChild(lab);
 })();
 </script>

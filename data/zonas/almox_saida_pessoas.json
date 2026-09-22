@@ -1,0 +1,15 @@
+{
+  "fonte": "data/videos/2026-09-21_almox_obliqua_01.mp4",
+  "comentario": "TESTE / VITRINE (2026-09-22). Zona de saida para rastrear PESSOAS, nao cestas. Proxy ilustrativo: o detector generico perde a cesta quando ela encosta no corpo, mas 'person' e classe nativa do COCO e a pessoa nunca fica ocluida. Conta-se quem desce na diagonal levando a cesta embora. A borda superior e paralela a bancada (y = -0,0925x + 0,4315, a mesma reta ajustada em almox_obliqua_teste.json) rebaixada para y = -0,0925x + 0,60, abaixo do tampo. Modo zonas de proposito, e nao modo linha: a anulacao de vai-e-volta descarta quem apenas circula perto da borda.",
+  "zonas": [
+    {
+      "nome": "saida",
+      "pontos": [
+        [0.0, 0.60],
+        [1.0, 0.5075],
+        [1.0, 1.0],
+        [0.0, 1.0]
+      ]
+    }
+  ]
+}
